@@ -1,0 +1,18 @@
+cd build
+ninja cppIDS
+ninja eval_harness
+ninja  # For both at once
+cd ..
+
+./cppIDS --config ids_config.ini --eval 300 --telemetry 30
+./eval_harness ../Wednesday-workingHours.pcap
+
+   Label	         Count
+Total flows	        692,703
+BENIGN		        440,031
+DoS Hulk		    231,073
+DoS GoldenEye	    10,293
+DoS Slowloris	    5,796
+DoS Slowhttptest	5,499
+Heartbleed	        11
+Total malicious	    252,672
