@@ -140,10 +140,12 @@ void LogisticModel::fit(std::vector<TrainingExample> &data, int epochs,
       }
       grad_b += err;
 
-      // Track cross-entropy loss with numerical bounds
-      float p = std::clamp(pred, 1e-7f, 1.0f - 1e-7f);
+      // Track cross-entropy loss with numerical bounds in double precision
+      double p_dbl = static_cast<double>(std::clamp(pred, 1e-7f, 1.0f - 1e-7f));
+      double target_dbl = static_cast<double>(target);
+        
       total_loss +=
-          -cw * (target * std::log(p) + (1.0f - target) * std::log(1.0f - p));
+          static_cast<double>(-cw) * (target_dbl * std::log(p_dbl) + (1.0 - target_dbl) * std::log(1.0 - p_dbl));
     }
 
     // Apply weight updates including L2 weight decay regularization
