@@ -38,7 +38,7 @@ jobs:
 
       - name: Configure CMake (Windows)
         if: runner.os == 'Windows'
-        run: cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DPCAP_INCLUDE_DIR="${{ github.workspace }}/npcap-sdk/Include"
-
+        run: cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DPCAP_INCLUDE_DIR="${{ github.workspace }}/npcap-sdk/Include" -DCMAKE_EXE_LINKER_FLAGS="-L${{ github.workspace }}/npcap-sdk/Lib/x64"
+        
       - name: Build cppIDS
         run: cmake --build build
