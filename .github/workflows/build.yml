@@ -27,10 +27,18 @@ jobs:
 
       - name: Install Windows Dependencies
         if: runner.os == 'Windows'
-        run: choco install ninja
+        run: |
+          choco install ninja
+          Invoke-WebRequest -Uri "https://npcap.com/dist/npcap-sdk-1.13.zip" -OutFile "npcap-sdk.zip"
+          Expand-Archive -Path "npcap-sdk.zip" -DestinationPath "npcap-sdk"
 
-      - name: Configure CMake
+      - name: Configure CMake (Linux)
+        if: runner.os == 'Linux'
         run: cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Release
+
+      - name: Configure CMake (Windows)
+        if: runner.os == 'Windows'
+        run: cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DPCAP_INCLUDE_DIR="${{ github.workspace }}/npcap-sdk/Include"
 
       - name: Build cppIDS
         run: cmake --build build

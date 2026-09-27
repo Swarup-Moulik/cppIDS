@@ -127,6 +127,6 @@ void load_config_file(const std::string &filepath, IDSConfig &cfg) {
   cfg.max_active_flows = std::max(1000u, cfg.max_active_flows);
   cfg.expiration_seconds = std::max(1.0f, cfg.expiration_seconds);
   cfg.drift_lock_threshold = std::max(0.1f, cfg.drift_lock_threshold);
-  cfg.alert_cooldown_ms = std::max(1000ULL, cfg.alert_cooldown_ms);
-  cfg.episode_timeout_ms = std::max(1000ULL, cfg.episode_timeout_ms);
+  cfg.alert_cooldown_ms = std::max(static_cast<uint64_t>(1000), cfg.alert_cooldown_ms);
+  cfg.episode_timeout_ms = std::max(static_cast<uint64_t>(1000), cfg.episode_timeout_ms);
 }
