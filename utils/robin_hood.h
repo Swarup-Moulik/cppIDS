@@ -39,6 +39,7 @@
   11 // for adding functionality in a backwards-compatible manner
 #define ROBIN_HOOD_VERSION_PATCH 5 // for backwards-compatible bug fixes
 
+#include <cstdint>
 #include <algorithm>
 #include <cstdlib>
 #include <cstring>
