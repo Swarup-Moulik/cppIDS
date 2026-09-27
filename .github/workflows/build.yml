@@ -19,26 +19,44 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      # ==========================================
+      # LINUX BUILD ENVIRONMENT
+      # ==========================================
       - name: Install Linux Dependencies
         if: runner.os == 'Linux'
         run: |
           sudo apt-get update
           sudo apt-get install -y ninja-build libpcap-dev
 
-      - name: Install Windows Dependencies
-        if: runner.os == 'Windows'
-        run: |
-          choco install ninja
-          Invoke-WebRequest -Uri "https://npcap.com/dist/npcap-sdk-1.13.zip" -OutFile "npcap-sdk.zip"
-          Expand-Archive -Path "npcap-sdk.zip" -DestinationPath "npcap-sdk"
-
       - name: Configure CMake (Linux)
         if: runner.os == 'Linux'
         run: cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Release
 
+      - name: Build cppIDS (Linux)
+        if: runner.os == 'Linux'
+        run: cmake --build build
+
+      # ==========================================
+      # WINDOWS (MSYS2 MINGW64) BUILD ENVIRONMENT
+      # ==========================================
+      - name: Setup MSYS2
+        if: runner.os == 'Windows'
+        uses: msys2/setup-msys2@v2
+        with:
+          msystem: MINGW64
+          update: true
+          install: >-
+            mingw-w64-x86_64-toolchain
+            mingw-w64-x86_64-cmake
+            mingw-w64-x86_64-ninja
+            mingw-w64-x86_64-libpcap
+
       - name: Configure CMake (Windows)
         if: runner.os == 'Windows'
-        run: cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DPCAP_INCLUDE_DIR="${{ github.workspace }}/npcap-sdk/Include" -DCMAKE_EXE_LINKER_FLAGS="-L${{ github.workspace }}/npcap-sdk/Lib/x64"
-        
-      - name: Build cppIDS
+        shell: msys2 {0}
+        run: cmake -B build -G Ninja -DCMAKE_BUILD_TYPE=Release
+
+      - name: Build cppIDS (Windows)
+        if: runner.os == 'Windows'
+        shell: msys2 {0}
         run: cmake --build build
