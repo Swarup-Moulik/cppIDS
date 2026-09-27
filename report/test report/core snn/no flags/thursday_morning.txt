@@ -1,0 +1,90 @@
+PS C:\dev\moksha\mokshaIDS\cppIDS\build> ./eval_harness --attackers 172.16.0.1 --victims 192.168.10.50 --ports 80,443 Thursday-Morning-WebAttacks.pcap
+=== Running cppIDS Benchmark Evaluation Harness ===
+[SYSTEM] Mode: STDP (Unsupervised, No Baseline)
+[SYSTEM] Ground Truth Attackers Registered: 172.16.0.1
+[BENCHMARK] Replaying packets from Thursday-Morning-WebAttacks.pcap
+[BENCHMARK] Packets processed: 4500000
+
+
+=======================================================
+          cppIDS Benchmark Evaluation Report
+=======================================================
+
+[1. CORE IDS CLASSIFICATION METRICS]
+True Positives (TP):       0
+True Negatives (TN):       84750
+False Positives (FP):      18
+False Negatives (FN):      2066
+Precision:                 0.00%
+Recall / Detection Rate:   0.00%
+F1-Score:                  0.00%
+Classification Accuracy:   97.60%
+False Positive Rate:       0.02%
+False Negative Rate:       100.00%
+
+[2. RUNTIME & LATENCY BENCHMARKS]
+Packets Processed:         4500000
+Packets Skipped:           24394
+Malformed/Invalid Pkts:    0
+Dropped/Evicted Flows:     0
+Min Latency:               0 us
+Avg Latency:               0.61 us
+Histogram Overflow (>1ms): 0 packets
+Median Latency (P50):      0 us
+P95 Latency:               1 us
+P99 Latency:               7 us
+Max Latency:               871 us
+Final Working Set RAM:     107 MB
+Throughput:                33532 PPS
+
+[3. CONTEXTUAL FALSE-POSITIVE SUPPRESSION]
+Anomalies Detected (SNN):  59863
+Anomalies Dismissed (Ctx): 59845
+Threats Confirmed:         18
+Context Matches:           59845
+Context Mismatches:        18
+Context Anomaly Dismissal: 99.97%
+
+[4. THREAT CONFIRMATION REASON BREAKDOWN]
+Pair Volumetric Flood:     TP = 0, FP = 8
+Slow DoS Heuristic:        TP = 0, FP = 0
+Spike Count Persistence:   TP = 0, FP = 10
+
+=======================================================
+             FALSE POSITIVE DIAGNOSTICS
+=======================================================
+
+[Top 10 FP Service Ports]
+  Port 465 -> 6 flows
+  Port 49666 -> 2 flows
+  Port 49671 -> 2 flows
+  Port 53 -> 2 flows
+  Port 8088 -> 1 flows
+  Port 53747 -> 1 flows
+  Port 49352 -> 1 flows
+  Port 443 -> 1 flows
+  Port 32274 -> 1 flows
+  Port 23511 -> 1 flows
+
+[Top 10 FP IP Pairs]
+  192.168.10.8 <-> 192.168.10.3 (3 flows)
+  192.168.10.15 <-> 192.168.10.50 (3 flows)
+  192.168.10.19 <-> 192.168.10.3 (2 flows)
+  192.168.10.15 <-> 192.168.10.3 (2 flows)
+  192.168.10.8 <-> 173.194.68.108 (1 flows)
+  192.168.10.8 <-> 52.196.50.49 (1 flows)
+  192.168.10.5 <-> 173.194.204.109 (1 flows)
+  192.168.10.15 <-> 173.194.205.109 (1 flows)
+  192.168.10.25 <-> 160.17.6.1 (1 flows)
+  192.168.10.14 <-> 173.194.205.109 (1 flows)
+
+=======================================================
+             FALSE NEGATIVE DIAGNOSTICS
+=======================================================
+
+[Top 10 FN Service Ports]
+  Port 80 -> 2066 flows
+
+[Top 10 FN IP Pairs]
+  172.16.0.1 <-> 192.168.10.50 (2064 flows)
+  192.168.10.50 <-> 172.16.0.1 (2 flows)

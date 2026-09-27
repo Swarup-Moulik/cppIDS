@@ -1,0 +1,121 @@
+PS C:\dev\moksha\mokshaIDS\cppIDS\build> ./eval_harness --base-model combined_model.bin --train-snn-readout combined_snn_readout.bin --attackers 172.16.0.1,192.168.10.8 --victims 192.168.10.5,192.168.10.9,192.168.10.12,192.168.10.14,192.168.10.15,192.168.10.16,192.168.10.17,192.168.10.19,192.168.10.25,192.168.10.50 ..\Wednesday-workingHours.pcap Thursday-Afternoon-Infiltration.pcap
+=== Running cppIDS Benchmark Evaluation Harness ===
+[SYSTEM] Pre-trained SNN BASELINE loaded from combined_model.bin
+[SYSTEM] Mode: TRAIN SNN READOUT (R-STDP Active)
+[SYSTEM] Ground Truth Attackers Registered: 172.16.0.1,192.168.10.8
+[BENCHMARK] Replaying packets from ..\Wednesday-workingHours.pcap
+[BENCHMARK] Packets processed: 13788878
+[BENCHMARK] Replaying packets from Thursday-Afternoon-Infiltration.pcap
+[BENCHMARK] Packets processed: 4822025
+
+
+=======================================================
+          cppIDS Benchmark Evaluation Report
+=======================================================
+
+[1. CORE IDS CLASSIFICATION METRICS]
+True Positives (TP):       71340
+True Negatives (TN):       505411
+False Positives (FP):      5627
+False Negatives (FN):      170943
+Precision:                 92.69%
+Recall / Detection Rate:   29.44%
+F1-Score:                  44.69%
+Classification Accuracy:   76.56%
+False Positive Rate:       1.10%
+False Negative Rate:       70.56%
+
+[2. RUNTIME & LATENCY BENCHMARKS]
+Packets Processed:         18610903
+Packets Skipped:           142484
+Malformed/Invalid Pkts:    0
+Dropped/Evicted Flows:     0
+Min Latency:               0 us
+Avg Latency:               0.78 us
+Histogram Overflow (>1ms): 471 packets
+Median Latency (P50):      0 us
+P95 Latency:               2 us
+P99 Latency:               4 us
+Max Latency:               96615 us
+Final Working Set RAM:     140 MB
+Throughput:                80861 PPS
+
+[3. CONTEXTUAL FALSE-POSITIVE SUPPRESSION]
+Anomalies Detected (SNN):  568293
+Anomalies Dismissed (Ctx): 491326
+Threats Confirmed:         76967
+Context Matches:           491326
+Context Mismatches:        76967
+Context Anomaly Dismissal: 86.46%
+
+[4. THREAT CONFIRMATION REASON BREAKDOWN]
+Pair Volumetric Flood:     TP = 0, FP = 0
+Slow DoS Heuristic:        TP = 0, FP = 0
+Spike Count Persistence:   TP = 71340, FP = 5627
+
+=======================================================
+             FALSE POSITIVE DIAGNOSTICS
+=======================================================
+
+[Top 10 FP Service Ports]
+  Port 443 -> 1192 flows
+  Port 80 -> 81 flows
+  Port 5355 -> 76 flows
+  Port 40920 -> 62 flows
+  Port 43216 -> 59 flows
+  Port 465 -> 51 flows
+  Port 5353 -> 43 flows
+  Port 51296 -> 27 flows
+  Port 1 -> 16 flows
+  Port 444 -> 15 flows
+
+[Top 10 FP IP Pairs]
+  192.168.10.8 <-> 192.168.10.51 (3658 flows)
+  192.168.10.5 <-> 162.208.20.178 (308 flows)
+  192.168.10.25 <-> 142.0.160.53 (299 flows)
+  192.168.10.5 <-> 162.208.22.34 (245 flows)
+  192.168.10.51 <-> 192.168.10.8 (233 flows)
+  192.168.10.25 <-> 192.168.10.50 (68 flows)
+  192.168.10.17 <-> 178.172.160.3 (68 flows)
+  192.168.10.8 <-> 199.244.49.56 (52 flows)
+  192.168.10.3 <-> 224.0.0.252 (50 flows)
+  192.168.10.15 <-> 178.172.160.3 (50 flows)
+
+=======================================================
+             FALSE NEGATIVE DIAGNOSTICS
+=======================================================
+
+[Top 10 FN Service Ports]
+  Port 80 -> 164030 flows
+  Port 135 -> 306 flows
+  Port 22 -> 274 flows
+  Port 139 -> 267 flows
+  Port 445 -> 259 flows
+  Port 21 -> 141 flows
+  Port 137 -> 107 flows
+  Port 443 -> 71 flows
+  Port 5432 -> 62 flows
+  Port 389 -> 62 flows
+
+[Top 10 FN IP Pairs]
+  172.16.0.1 <-> 192.168.10.50 (161451 flows)
+  192.168.10.8 <-> 192.168.10.5 (4322 flows)
+  192.168.10.50 <-> 172.16.0.1 (2549 flows)
+  192.168.10.8 <-> 192.168.10.50 (530 flows)
+  192.168.10.8 <-> 192.168.10.9 (398 flows)
+  192.168.10.8 <-> 192.168.10.12 (302 flows)
+  192.168.10.8 <-> 192.168.10.14 (276 flows)
+  192.168.10.8 <-> 192.168.10.15 (276 flows)
+  192.168.10.8 <-> 192.168.10.19 (197 flows)
+  192.168.10.8 <-> 192.168.10.17 (197 flows)
+
+[SNN READOUT EXPORT] Learned Synaptic Weights (Hidden -> Threat LIF):
+  Synapse [Hidden 0 -> Threat]: 73.25
+  Synapse [Hidden 1 -> Threat]: 73.24
+  Synapse [Hidden 2 -> Threat]: 73.26
+  Synapse [Hidden 3 -> Threat]: 73.17
+  Synapse [Hidden 4 -> Threat]: 73.23
+  Synapse [Hidden 5 -> Threat]: 73.35
+  Synapse [Hidden 6 -> Threat]: 73.25
+  Synapse [Hidden 7 -> Threat]: 73.15
+[SYSTEM] Successfully exported Spiking Readout to combined_snn_readout.bin

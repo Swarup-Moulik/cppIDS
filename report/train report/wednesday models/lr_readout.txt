@@ -1,0 +1,113 @@
+PS C:\dev\moksha\mokshaIDS\cppIDS\build> ./eval_harness --base-model wednesday_model.bin --train-lr wednesday_lr_model.bin --attackers 172.16.0.1 --victims 192.168.10.50 --ports 80,443 ..\Wednesday-workingHours.pcap
+=== Running cppIDS Benchmark Evaluation Harness ===
+[SYSTEM] Pre-trained SNN BASELINE loaded from wednesday_model.bin
+[SYSTEM] Mode: TRAIN BATCH LOGISTIC REGRESSION (In-Memory Collection)
+[SYSTEM] Ground Truth Attackers Registered: 172.16.0.1
+[BENCHMARK] Replaying packets from ..\Wednesday-workingHours.pcap
+[BENCHMARK] Packets processed: 13788878
+
+
+[TRAINING] Fitting Logistic Regression over collected flow buffer...
+[LR TRAIN] Total Flows=492005 | Pos=180387 | Neg=311618 | w_pos=1.36375 | w_neg=0.789436
+  Epoch 0 | Loss: 0.693147
+  Epoch 20 | Loss: 0.196604
+  Epoch 40 | Loss: 0.142188
+  Epoch 60 | Loss: 0.119743
+  Epoch 80 | Loss: 0.107401
+  Epoch 99 | Loss: 0.0999178
+
+[LOGISTIC REGRESSION READOUT PARAMETERS]
+  Bias: -0.612847
+  Ch0_Payload: -0.0222412 (mean=0.0367415, std=1.91315)
+  Ch1_Rhythm: -0.123095 (mean=0.740873, std=8.87942)
+  Ch2_Protocol: 0 (mean=0, std=1)
+  Ch3_Rate: 1.10395 (mean=1637.68, std=1181.02)
+  Ch4_Variance: -0.218527 (mean=3.66013, std=25.2123)
+  Ch5_Asym: -0.0259671 (mean=0.284676, std=8.17279)
+  SpikeCount: -0.00211518 (mean=2.8455e-05, std=0.0078086)
+  PairDensity: 1.68885 (mean=2858.99, std=3986.47)
+  IsWeb: 0.794715 (mean=0.570913, std=0.494946)
+  IsDNS: -0.760256 (mean=0.403937, std=0.490685)
+  IsEnterprise: -0.0540208 (mean=0.00969502, std=0.0979848)
+
+[SYSTEM] Logistic Regression Model successfully saved to wednesday_lr_model.bin
+
+=======================================================
+          cppIDS Benchmark Evaluation Report
+=======================================================
+
+[1. CORE IDS CLASSIFICATION METRICS]
+True Positives (TP):       179984
+True Negatives (TN):       305567
+False Positives (FP):      6051
+False Negatives (FN):      403
+Precision:                 96.75%
+Recall / Detection Rate:   99.78%
+F1-Score:                  98.24%
+Classification Accuracy:   98.69%
+False Positive Rate:       1.94%
+False Negative Rate:       0.22%
+
+[2. RUNTIME & LATENCY BENCHMARKS]
+Packets Processed:         13788878
+Packets Skipped:           83923
+Malformed/Invalid Pkts:    0
+Dropped/Evicted Flows:     0
+Min Latency:               0 us
+Avg Latency:               0.95 us
+Histogram Overflow (>1ms): 1362 packets
+Median Latency (P50):      0 us
+P95 Latency:               2 us
+P99 Latency:               6 us
+Max Latency:               59048 us
+Final Working Set RAM:     162 MB
+Throughput:                94099 PPS
+
+[3. CONTEXTUAL FALSE-POSITIVE SUPPRESSION]
+Anomalies Detected (SNN):  375924
+Anomalies Dismissed (Ctx): 189889
+Threats Confirmed:         186035
+Context Matches:           189889
+Context Mismatches:        186035
+Context Anomaly Dismissal: 50.51%
+
+[4. THREAT CONFIRMATION REASON BREAKDOWN]
+Pair Volumetric Flood:     TP = 179984, FP = 6051
+Slow DoS Heuristic:        TP = 0, FP = 0
+Spike Count Persistence:   TP = 0, FP = 0
+
+=======================================================
+             FALSE POSITIVE DIAGNOSTICS
+=======================================================
+
+[Top 10 FP Service Ports]
+  Port 443 -> 6037 flows
+  Port 53 -> 5 flows
+  Port 49666 -> 4 flows
+  Port 49671 -> 2 flows
+  Port 20070 -> 1 flows
+  Port 16989 -> 1 flows
+  Port 49582 -> 1 flows
+
+[Top 10 FP IP Pairs]
+  192.168.10.5 <-> 162.208.20.178 (3186 flows)
+  192.168.10.5 <-> 162.208.22.34 (2576 flows)
+  192.168.10.25 <-> 151.101.209.127 (127 flows)
+  192.168.10.15 <-> 178.172.160.3 (81 flows)
+  192.168.10.12 <-> 178.172.160.4 (53 flows)
+  192.168.10.25 <-> 52.84.86.104 (14 flows)
+  192.168.10.8 <-> 192.168.10.3 (4 flows)
+  192.168.10.5 <-> 192.168.10.3 (3 flows)
+  192.168.10.9 <-> 192.168.10.3 (2 flows)
+  192.168.10.12 <-> 192.168.10.3 (2 flows)
+
+=======================================================
+             FALSE NEGATIVE DIAGNOSTICS
+=======================================================
+
+[Top 10 FN Service Ports]
+  Port 80 -> 403 flows
+
+[Top 10 FN IP Pairs]
+  192.168.10.50 <-> 172.16.0.1 (207 flows)
+  172.16.0.1 <-> 192.168.10.50 (196 flows)

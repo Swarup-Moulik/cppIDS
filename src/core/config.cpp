@@ -4,8 +4,11 @@
 #include <fstream>
 #include <iostream>
 
+/* @brief Resets the configuration structure back to default parameters */
 void load_default_config(IDSConfig &cfg) { cfg = IDSConfig(); }
 
+/* @brief Parses an unsigned 32-bit integer and ensures it is positive and
+ * nonzero */
 static bool parse_positive_uint32(const std::string &s, uint32_t &out) {
   if (s.empty() || s[0] == '-')
     return false;
@@ -17,6 +20,8 @@ static bool parse_positive_uint32(const std::string &s, uint32_t &out) {
   return true;
 }
 
+/* @brief Parses an unsigned 64-bit integer and ensures it is positive and
+ * nonzero */
 static bool parse_positive_uint64(const std::string &s, uint64_t &out) {
   if (s.empty() || s[0] == '-')
     return false;
@@ -28,6 +33,8 @@ static bool parse_positive_uint64(const std::string &s, uint64_t &out) {
   return true;
 }
 
+/* @brief Parses a floating point number and verifies it is finite and not NaN
+ */
 static bool parse_finite_float(const std::string &s, float &out) {
   if (s.empty())
     return false;
@@ -39,6 +46,7 @@ static bool parse_finite_float(const std::string &s, float &out) {
   return true;
 }
 
+/* @brief Parses an INI configuration file and updates engine parameters */
 void load_config_file(const std::string &filepath, IDSConfig &cfg) {
   std::ifstream file(filepath);
   if (!file.is_open()) {
@@ -56,11 +64,13 @@ void load_config_file(const std::string &filepath, IDSConfig &cfg) {
     std::string key = line.substr(0, eq_pos);
     std::string val = line.substr(eq_pos + 1);
 
+    // Trim whitespace from both ends of key and value
     key.erase(0, key.find_first_not_of(" \t"));
     key.erase(key.find_last_not_of(" \t") + 1);
     val.erase(0, val.find_first_not_of(" \t"));
     val.erase(val.find_last_not_of(" \t") + 1);
 
+    // Skip empty lines and comments
     if (key.empty() || key[0] == '#')
       continue;
 
@@ -110,7 +120,7 @@ void load_config_file(const std::string &filepath, IDSConfig &cfg) {
     }
   }
 
-  // Strict Bounds sanitization
+  // Enforce boundary safety limits on configured parameters
   cfg.tau = std::max(0.001f, cfg.tau);
   cfg.prediction_alpha = std::clamp(cfg.prediction_alpha, 0.001f, 1.0f);
   cfg.fire_threshold = std::max(10.0f, cfg.fire_threshold);

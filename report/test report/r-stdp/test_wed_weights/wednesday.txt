@@ -1,0 +1,101 @@
+PS C:\dev\moksha\mokshaIDS\cppIDS\build> ./eval_harness --base-model wednesday_model.bin --test-snn-readout wednesday_snn_readout.bin --attackers 172.16.0.1 --victims 192.168.10.50 --ports 80,443 ..\Wednesday-workingHours.pcap
+=== Running cppIDS Benchmark Evaluation Harness ===
+[SYSTEM] Pre-trained SNN BASELINE loaded from wednesday_model.bin
+
+[SNN READOUT LOAD] Loaded Synaptic Weights (Hidden -> Threat LIF):
+  Synapse [Hidden 0 -> Threat]: 5
+  Synapse [Hidden 1 -> Threat]: 5
+  Synapse [Hidden 2 -> Threat]: 5
+  Synapse [Hidden 3 -> Threat]: 5
+  Synapse [Hidden 4 -> Threat]: 5
+  Synapse [Hidden 5 -> Threat]: 5
+  Synapse [Hidden 6 -> Threat]: 5
+  Synapse [Hidden 7 -> Threat]: 5
+[SYSTEM] Mode: TEST SNN READOUT (Neuromorphic Inference)
+[SYSTEM] Ground Truth Attackers Registered: 172.16.0.1
+[BENCHMARK] Replaying packets from ..\Wednesday-workingHours.pcap
+[BENCHMARK] Packets processed: 13788878
+
+
+=======================================================
+          cppIDS Benchmark Evaluation Report
+=======================================================
+
+[1. CORE IDS CLASSIFICATION METRICS]
+True Positives (TP):       12569
+True Negatives (TN):       310999
+False Positives (FP):      619
+False Negatives (FN):      167818
+Precision:                 95.31%
+Recall / Detection Rate:   6.97%
+F1-Score:                  12.99%
+Classification Accuracy:   65.77%
+False Positive Rate:       0.20%
+False Negative Rate:       93.03%
+
+[2. RUNTIME & LATENCY BENCHMARKS]
+Packets Processed:         13788878
+Packets Skipped:           83923
+Malformed/Invalid Pkts:    0
+Dropped/Evicted Flows:     0
+Min Latency:               0 us
+Avg Latency:               0.60 us
+Histogram Overflow (>1ms): 91 packets
+Median Latency (P50):      0 us
+P95 Latency:               1 us
+P99 Latency:               3 us
+Max Latency:               47312 us
+Final Working Set RAM:     140 MB
+Throughput:                86459 PPS
+
+[3. CONTEXTUAL FALSE-POSITIVE SUPPRESSION]
+Anomalies Detected (SNN):  375924
+Anomalies Dismissed (Ctx): 362736
+Threats Confirmed:         13188
+Context Matches:           362736
+Context Mismatches:        13188
+Context Anomaly Dismissal: 96.49%
+
+[4. THREAT CONFIRMATION REASON BREAKDOWN]
+Pair Volumetric Flood:     TP = 0, FP = 0
+Slow DoS Heuristic:        TP = 0, FP = 0
+Spike Count Persistence:   TP = 12569, FP = 619
+
+=======================================================
+             FALSE POSITIVE DIAGNOSTICS
+=======================================================
+
+[Top 10 FP Service Ports]
+  Port 443 -> 496 flows
+  Port 80 -> 50 flows
+  Port 5353 -> 23 flows
+  Port 5355 -> 12 flows
+  Port 465 -> 7 flows
+  Port 49666 -> 5 flows
+  Port 8612 -> 3 flows
+  Port 8610 -> 3 flows
+  Port 49671 -> 2 flows
+  Port 18678 -> 1 flows
+
+[Top 10 FP IP Pairs]
+  192.168.10.5 <-> 162.208.22.34 (172 flows)
+  192.168.10.5 <-> 162.208.20.178 (164 flows)
+  192.168.10.12 <-> 178.172.160.4 (46 flows)
+  192.168.10.15 <-> 178.172.160.3 (45 flows)
+  192.168.10.25 <-> 151.101.209.127 (38 flows)
+  192.168.10.25 <-> 52.84.86.104 (31 flows)
+  192.168.10.19 <-> 113.29.189.10 (16 flows)
+  192.168.10.19 <-> 113.29.190.10 (12 flows)
+  192.168.10.3 <-> 224.0.0.252 (12 flows)
+  192.168.10.19 <-> 61.251.98.135 (11 flows)
+
+=======================================================
+             FALSE NEGATIVE DIAGNOSTICS
+=======================================================
+
+[Top 10 FN Service Ports]
+  Port 80 -> 167818 flows
+
+[Top 10 FN IP Pairs]
+  172.16.0.1 <-> 192.168.10.50 (165215 flows)
+  192.168.10.50 <-> 172.16.0.1 (2603 flows)

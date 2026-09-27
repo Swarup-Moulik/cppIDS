@@ -1,0 +1,18 @@
+# ==============================================================================
+# cppIDS Training Commands (Working Dir: cppIDS\build)
+# ==============================================================================
+
+# 1. Wednesday Models
+./eval_harness --train wednesday_model.bin --attackers 172.16.0.1 --victims 192.168.10.50 --ports 80,443 ..\Wednesday-workingHours.pcap
+./eval_harness --base-model wednesday_model.bin --train-snn-readout wednesday_snn_readout.bin --attackers 172.16.0.1 --victims 192.168.10.50 --ports 80,443 ..\Wednesday-workingHours.pcap
+./eval_harness --base-model wednesday_model.bin --train-lr wednesday_lr_model.bin --attackers 172.16.0.1 --victims 192.168.10.50 --ports 80,443 ..\Wednesday-workingHours.pcap
+
+# 2. Combined Models (Wednesday + Thursday Afternoon)
+./eval_harness --train combined_model.bin --attackers 172.16.0.1,192.168.10.8 --victims 192.168.10.5,192.168.10.9,192.168.10.12,192.168.10.14,192.168.10.15,192.168.10.16,192.168.10.17,192.168.10.19,192.168.10.25,192.168.10.50 ..\Wednesday-workingHours.pcap Thursday-Afternoon-Infiltration.pcap
+./eval_harness --base-model combined_model.bin --train-snn-readout combined_snn_readout.bin --attackers 172.16.0.1,192.168.10.8 --victims 192.168.10.5,192.168.10.9,192.168.10.12,192.168.10.14,192.168.10.15,192.168.10.16,192.168.10.17,192.168.10.19,192.168.10.25,192.168.10.50 ..\Wednesday-workingHours.pcap Thursday-Afternoon-Infiltration.pcap
+./eval_harness --base-model combined_model.bin --train-lr combined_lr_model.bin --attackers 172.16.0.1,192.168.10.8 --victims 192.168.10.5,192.168.10.9,192.168.10.12,192.168.10.14,192.168.10.15,192.168.10.16,192.168.10.17,192.168.10.19,192.168.10.25,192.168.10.50 ..\Wednesday-workingHours.pcap Thursday-Afternoon-Infiltration.pcap
+
+# 3. Test Inferences
+./eval_harness --test wednesday_model.bin --attackers 172.16.0.1 --victims 192.168.10.50 --ports 80,443 ..\Wednesday-workingHours.pcap
+./eval_harness --base-model wednesday_model.bin --test-snn-readout wednesday_snn_readout.bin --attackers 172.16.0.1 --victims 192.168.10.50 --ports 80,443 ..\Wednesday-workingHours.pcap
+./eval_harness --base-model wednesday_model.bin --test-lr wednesday_lr_model.bin --attackers 172.16.0.1 --victims 192.168.10.50 --ports 80,443 ..\Wednesday-workingHours.pcap

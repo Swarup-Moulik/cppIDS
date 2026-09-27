@@ -1,0 +1,91 @@
+PS C:\dev\moksha\mokshaIDS\cppIDS\build> ./eval_harness --base-model combined_model.bin --test-lr combined_lr_model.bin --attackers 172.16.0.1 --victims 192.168.10.50 --ports 80,443 ..\Wednesday-workingHours.pcap
+=== Running cppIDS Benchmark Evaluation Harness ===
+[SYSTEM] Pre-trained SNN BASELINE loaded from combined_model.bin
+[SYSTEM] Mode: TEST BATCH LOGISTIC REGRESSION (Inference Active)
+[SYSTEM] Ground Truth Attackers Registered: 172.16.0.1
+[BENCHMARK] Replaying packets from ..\Wednesday-workingHours.pcap
+[BENCHMARK] Packets processed: 13788878
+
+
+=======================================================
+          cppIDS Benchmark Evaluation Report
+=======================================================
+
+[1. CORE IDS CLASSIFICATION METRICS]
+True Positives (TP):       179546
+True Negatives (TN):       287878
+False Positives (FP):      23740
+False Negatives (FN):      841
+Precision:                 88.32%
+Recall / Detection Rate:   99.53%
+F1-Score:                  93.59%
+Classification Accuracy:   95.00%
+False Positive Rate:       7.62%
+False Negative Rate:       0.47%
+
+[2. RUNTIME & LATENCY BENCHMARKS]
+Packets Processed:         13788878
+Packets Skipped:           83923
+Malformed/Invalid Pkts:    0
+Dropped/Evicted Flows:     0
+Min Latency:               0 us
+Avg Latency:               1.18 us
+Histogram Overflow (>1ms): 1535 packets
+Median Latency (P50):      0 us
+P95 Latency:               2 us
+P99 Latency:               7 us
+Max Latency:               605775 us
+Final Working Set RAM:     140 MB
+Throughput:                62070 PPS
+
+[3. CONTEXTUAL FALSE-POSITIVE SUPPRESSION]
+Anomalies Detected (SNN):  379593
+Anomalies Dismissed (Ctx): 176307
+Threats Confirmed:         203286
+Context Matches:           176307
+Context Mismatches:        203286
+Context Anomaly Dismissal: 46.45%
+
+[4. THREAT CONFIRMATION REASON BREAKDOWN]
+Pair Volumetric Flood:     TP = 0, FP = 0
+Slow DoS Heuristic:        TP = 0, FP = 0
+Spike Count Persistence:   TP = 179546, FP = 23740
+
+=======================================================
+             FALSE POSITIVE DIAGNOSTICS
+=======================================================
+
+[Top 10 FP Service Ports]
+  Port 443 -> 15332 flows
+  Port 80 -> 8150 flows
+  Port 123 -> 89 flows
+  Port 137 -> 32 flows
+  Port 22 -> 27 flows
+  Port 88 -> 24 flows
+  Port 389 -> 17 flows
+  Port 21 -> 14 flows
+  Port 445 -> 12 flows
+  Port 465 -> 9 flows
+
+[Top 10 FP IP Pairs]
+  192.168.10.5 <-> 162.208.20.178 (2999 flows)
+  192.168.10.5 <-> 162.208.22.34 (2371 flows)
+  192.168.10.8 <-> 23.50.75.27 (116 flows)
+  192.168.10.8 <-> 199.244.48.54 (103 flows)
+  192.168.10.14 <-> 23.50.75.27 (77 flows)
+  192.168.10.5 <-> 23.61.187.27 (73 flows)
+  192.168.10.8 <-> 192.229.211.40 (72 flows)
+  192.168.10.5 <-> 205.185.216.10 (68 flows)
+  192.168.10.8 <-> 184.73.199.125 (67 flows)
+  192.168.10.8 <-> 162.208.22.34 (67 flows)
+
+=======================================================
+             FALSE NEGATIVE DIAGNOSTICS
+=======================================================
+
+[Top 10 FN Service Ports]
+  Port 80 -> 841 flows
+
+[Top 10 FN IP Pairs]
+  172.16.0.1 <-> 192.168.10.50 (423 flows)
+  192.168.10.50 <-> 172.16.0.1 (418 flows)

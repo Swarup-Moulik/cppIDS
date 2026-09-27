@@ -37,8 +37,12 @@ add_executable(eval_harness tests/evaluation_harness.cpp ${CORE_SOURCES})
 
 # Link psapi for Windows RAM usage tracking, and pcap for the evaluation harness
 if(WIN32)
-  target_link_libraries(cppids PRIVATE psapi)
+  target_link_libraries(cppids PRIVATE psapi pcap)
   target_link_libraries(eval_harness PRIVATE psapi pcap)
+elseif(UNIX AND NOT APPLE)
+  # Link dl for dlopen/dlsym runtime binding and pcap for capture wrappers
+  target_link_libraries(cppids PRIVATE dl pcap)
+  target_link_libraries(eval_harness PRIVATE dl pcap)
 endif()
 
 # ==========================================

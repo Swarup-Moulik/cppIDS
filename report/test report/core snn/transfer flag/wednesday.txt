@@ -1,0 +1,91 @@
+PS C:\dev\moksha\mokshaIDS\cppIDS\build> ./eval_harness --transfer wednesday_model.bin --attackers 172.16.0.1 --victims 192.168.10.50 --ports 80,443 ..\Wednesday-workingHours.pcap
+=== Running cppIDS Benchmark Evaluation Harness ===
+[SYSTEM] Pre-trained weights loaded from wednesday_model.bin
+[SYSTEM] Mode: TRANSFER (STDP Enabled, Baseline Active)
+[SYSTEM] Ground Truth Attackers Registered: 172.16.0.1
+[BENCHMARK] Replaying packets from ..\Wednesday-workingHours.pcap
+[BENCHMARK] Packets processed: 13788878
+
+
+=======================================================
+          cppIDS Benchmark Evaluation Report
+=======================================================
+
+[1. CORE IDS CLASSIFICATION METRICS]
+True Positives (TP):       179982
+True Negatives (TN):       305516
+False Positives (FP):      6102
+False Negatives (FN):      405
+Precision:                 96.72%
+Recall / Detection Rate:   99.78%
+F1-Score:                  98.22%
+Classification Accuracy:   98.68%
+False Positive Rate:       1.96%
+False Negative Rate:       0.22%
+
+[2. RUNTIME & LATENCY BENCHMARKS]
+Packets Processed:         13788878
+Packets Skipped:           83923
+Malformed/Invalid Pkts:    0
+Dropped/Evicted Flows:     0
+Min Latency:               0 us
+Avg Latency:               0.85 us
+Histogram Overflow (>1ms): 545 packets
+Median Latency (P50):      0 us
+P95 Latency:               2 us
+P99 Latency:               4 us
+Max Latency:               83954 us
+Final Working Set RAM:     139 MB
+Throughput:                71617 PPS
+
+[3. CONTEXTUAL FALSE-POSITIVE SUPPRESSION]
+Anomalies Detected (SNN):  375628
+Anomalies Dismissed (Ctx): 189544
+Threats Confirmed:         186084
+Context Matches:           189544
+Context Mismatches:        186084
+Context Anomaly Dismissal: 50.46%
+
+[4. THREAT CONFIRMATION REASON BREAKDOWN]
+Pair Volumetric Flood:     TP = 179982, FP = 6098
+Slow DoS Heuristic:        TP = 0, FP = 1
+Spike Count Persistence:   TP = 0, FP = 3
+
+=======================================================
+             FALSE POSITIVE DIAGNOSTICS
+=======================================================
+
+[Top 10 FP Service Ports]
+  Port 443 -> 6075 flows
+  Port 80 -> 9 flows
+  Port 53 -> 5 flows
+  Port 49666 -> 4 flows
+  Port 49671 -> 2 flows
+  Port 444 -> 1 flows
+  Port 58269 -> 1 flows
+  Port 20070 -> 1 flows
+  Port 16989 -> 1 flows
+  Port 17636 -> 1 flows
+
+[Top 10 FP IP Pairs]
+  192.168.10.5 <-> 162.208.20.178 (3194 flows)
+  192.168.10.5 <-> 162.208.22.34 (2580 flows)
+  192.168.10.25 <-> 151.101.209.127 (129 flows)
+  192.168.10.15 <-> 178.172.160.3 (90 flows)
+  192.168.10.12 <-> 178.172.160.4 (57 flows)
+  192.168.10.25 <-> 52.84.86.104 (25 flows)
+  192.168.10.19 <-> 113.29.190.10 (9 flows)
+  192.168.10.8 <-> 192.168.10.3 (4 flows)
+  192.168.10.5 <-> 192.168.10.3 (3 flows)
+  192.168.10.12 <-> 192.168.10.3 (2 flows)
+
+=======================================================
+             FALSE NEGATIVE DIAGNOSTICS
+=======================================================
+
+[Top 10 FN Service Ports]
+  Port 80 -> 405 flows
+
+[Top 10 FN IP Pairs]
+  192.168.10.50 <-> 172.16.0.1 (207 flows)
+  172.16.0.1 <-> 192.168.10.50 (198 flows)

@@ -1,0 +1,100 @@
+PS C:\dev\moksha\mokshaIDS\cppIDS\build> ./eval_harness --train wednesday_model.bin --attackers 172.16.0.1 --victims 192.168.10.50 --ports 80,443 ..\Wednesday-workingHours.pcap
+=== Running cppIDS Benchmark Evaluation Harness ===
+[SYSTEM] Mode: TRAIN (STDP Enabled, Baseline Export Pending)
+[SYSTEM] Ground Truth Attackers Registered: 172.16.0.1
+[BENCHMARK] Replaying packets from ..\Wednesday-workingHours.pcap
+[BENCHMARK] Packets processed: 13788878
+
+
+=======================================================
+          cppIDS Benchmark Evaluation Report
+=======================================================
+
+[1. CORE IDS CLASSIFICATION METRICS]
+True Positives (TP):       179939
+True Negatives (TN):       305558
+False Positives (FP):      6060
+False Negatives (FN):      448
+Precision:                 96.74%
+Recall / Detection Rate:   99.75%
+F1-Score:                  98.22%
+Classification Accuracy:   98.68%
+False Positive Rate:       1.94%
+False Negative Rate:       0.25%
+
+[2. RUNTIME & LATENCY BENCHMARKS]
+Packets Processed:         13788878
+Packets Skipped:           83923
+Malformed/Invalid Pkts:    0
+Dropped/Evicted Flows:     0
+Min Latency:               0 us
+Avg Latency:               1.33 us
+Histogram Overflow (>1ms): 1515 packets
+Median Latency (P50):      0 us
+P95 Latency:               3 us
+P99 Latency:               12 us
+Max Latency:               183438 us
+Final Working Set RAM:     139 MB
+Throughput:                76002 PPS
+
+[3. CONTEXTUAL FALSE-POSITIVE SUPPRESSION]
+Anomalies Detected (SNN):  405719
+Anomalies Dismissed (Ctx): 219720
+Threats Confirmed:         185999
+Context Matches:           219720
+Context Mismatches:        185999
+Context Anomaly Dismissal: 54.16%
+
+[4. THREAT CONFIRMATION REASON BREAKDOWN]
+Pair Volumetric Flood:     TP = 179939, FP = 6031
+Slow DoS Heuristic:        TP = 0, FP = 1
+Spike Count Persistence:   TP = 0, FP = 28
+
+=======================================================
+             FALSE POSITIVE DIAGNOSTICS
+=======================================================
+
+[Top 10 FP Service Ports]
+  Port 443 -> 6014 flows
+  Port 465 -> 12 flows
+  Port 53 -> 5 flows
+  Port 49666 -> 4 flows
+  Port 80 -> 3 flows
+  Port 49671 -> 2 flows
+  Port 58269 -> 1 flows
+  Port 45605 -> 1 flows
+  Port 16989 -> 1 flows
+  Port 55240 -> 1 flows
+
+[Top 10 FP IP Pairs]
+  192.168.10.5 <-> 162.208.20.178 (3170 flows)
+  192.168.10.5 <-> 162.208.22.34 (2561 flows)
+  192.168.10.25 <-> 151.101.209.127 (122 flows)
+  192.168.10.15 <-> 178.172.160.3 (86 flows)
+  192.168.10.12 <-> 178.172.160.4 (54 flows)
+  192.168.10.25 <-> 52.84.86.104 (21 flows)
+  192.168.10.8 <-> 192.168.10.3 (4 flows)
+  192.168.10.8 <-> 192.168.10.50 (4 flows)
+  192.168.10.5 <-> 192.168.10.50 (3 flows)
+  192.168.10.5 <-> 192.168.10.3 (3 flows)
+
+=======================================================
+             FALSE NEGATIVE DIAGNOSTICS
+=======================================================
+
+[Top 10 FN Service Ports]
+  Port 80 -> 448 flows
+
+[Top 10 FN IP Pairs]
+  192.168.10.50 <-> 172.16.0.1 (234 flows)
+  172.16.0.1 <-> 192.168.10.50 (214 flows)
+
+[SNN EXPORT] Inspecting Stratified Weights:
+[SNN EXPORT] Averaged synaptic weights per channel:
+  Channel 0 Avg: 0.79
+  Channel 1 Avg: 0.79
+  Channel 2 Avg: 0.79
+  Channel 3 Avg: 2.88
+  Channel 4 Avg: 0.79
+  Channel 5 Avg: 0.79
+[SYSTEM] Successfully exported Threat Baseline to wednesday_model.bin

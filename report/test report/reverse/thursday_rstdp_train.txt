@@ -1,0 +1,119 @@
+PS C:\dev\moksha\mokshaIDS\cppIDS\build> ./eval_harness --base-model thursday_model.bin --train-snn-readout thurs_snn_readout.bin --attackers 192.168.10.8 --victims 192.168.10.5,192.168.10.9,192.168.10.12,192.168.10.14,192.168.10.15,192.168.10.16,192.168.10.17,192.168.10.19,192.168.10.25,192.168.10.50 Thursday-Afternoon-Infiltration.pcap
+=== Running cppIDS Benchmark Evaluation Harness ===
+[SYSTEM] Pre-trained SNN BASELINE loaded from thursday_model.bin
+[SYSTEM] Mode: TRAIN SNN READOUT (R-STDP Active)
+[SYSTEM] Ground Truth Attackers Registered: 192.168.10.8
+[BENCHMARK] Replaying packets from Thursday-Afternoon-Infiltration.pcap
+[BENCHMARK] Packets processed: 4822025
+
+
+=======================================================
+          cppIDS Benchmark Evaluation Report
+=======================================================
+
+[1. CORE IDS CLASSIFICATION METRICS]
+True Positives (TP):       6365
+True Negatives (TN):       196257
+False Positives (FP):      3512
+False Negatives (FN):      55237
+Precision:                 64.44%
+Recall / Detection Rate:   10.33%
+F1-Score:                  17.81%
+Classification Accuracy:   77.52%
+False Positive Rate:       1.76%
+False Negative Rate:       89.67%
+
+[2. RUNTIME & LATENCY BENCHMARKS]
+Packets Processed:         4822025
+Packets Skipped:           58561
+Malformed/Invalid Pkts:    0
+Dropped/Evicted Flows:     0
+Min Latency:               0 us
+Avg Latency:               0.69 us
+Histogram Overflow (>1ms): 67 packets
+Median Latency (P50):      0 us
+P95 Latency:               2 us
+P99 Latency:               5 us
+Max Latency:               16856 us
+Final Working Set RAM:     138 MB
+Throughput:                90936 PPS
+
+[3. CONTEXTUAL FALSE-POSITIVE SUPPRESSION]
+Anomalies Detected (SNN):  191974
+Anomalies Dismissed (Ctx): 182097
+Threats Confirmed:         9877
+Context Matches:           182097
+Context Mismatches:        9877
+Context Anomaly Dismissal: 94.86%
+
+[4. THREAT CONFIRMATION REASON BREAKDOWN]
+Pair Volumetric Flood:     TP = 0, FP = 0
+Slow DoS Heuristic:        TP = 0, FP = 0
+Spike Count Persistence:   TP = 6365, FP = 3512
+
+=======================================================
+             FALSE POSITIVE DIAGNOSTICS
+=======================================================
+
+[Top 10 FP Service Ports]
+  Port 443 -> 2200 flows
+  Port 5355 -> 58 flows
+  Port 50122 -> 32 flows
+  Port 465 -> 16 flows
+  Port 49666 -> 14 flows
+  Port 444 -> 12 flows
+  Port 5353 -> 8 flows
+  Port 3478 -> 6 flows
+  Port 1900 -> 5 flows
+  Port 1031 -> 3 flows
+
+[Top 10 FP IP Pairs]
+  192.168.10.25 <-> 142.0.160.53 (1662 flows)
+  172.16.0.1 <-> 192.168.10.51 (892 flows)
+  192.168.10.8 <-> 199.244.49.56 (425 flows)
+  192.168.10.8 <-> 192.168.10.51 (60 flows)
+  192.168.10.9 <-> 205.180.85.169 (52 flows)
+  192.168.10.17 <-> 178.172.160.3 (48 flows)
+  192.168.10.51 <-> 172.16.0.1 (38 flows)
+  192.168.10.8 <-> 224.0.0.252 (33 flows)
+  192.168.10.25 <-> 192.168.10.50 (33 flows)
+  192.168.10.19 <-> 192.168.10.50 (30 flows)
+
+=======================================================
+             FALSE NEGATIVE DIAGNOSTICS
+=======================================================
+
+[Top 10 FN Service Ports]
+  Port 135 -> 306 flows
+  Port 139 -> 267 flows
+  Port 445 -> 259 flows
+  Port 22 -> 165 flows
+  Port 80 -> 162 flows
+  Port 1 -> 137 flows
+  Port 21 -> 119 flows
+  Port 137 -> 107 flows
+  Port 1042 -> 96 flows
+  Port 1041 -> 95 flows
+
+[Top 10 FN IP Pairs]
+  192.168.10.8 <-> 192.168.10.5 (8250 flows)
+  192.168.10.8 <-> 192.168.10.15 (8098 flows)
+  192.168.10.8 <-> 192.168.10.14 (8098 flows)
+  192.168.10.8 <-> 192.168.10.25 (6114 flows)
+  192.168.10.8 <-> 192.168.10.9 (4502 flows)
+  192.168.10.8 <-> 192.168.10.50 (4325 flows)
+  192.168.10.8 <-> 192.168.10.17 (3871 flows)
+  192.168.10.8 <-> 192.168.10.19 (3852 flows)
+  192.168.10.8 <-> 192.168.10.16 (3830 flows)
+  192.168.10.8 <-> 192.168.10.12 (2933 flows)
+
+[SNN READOUT EXPORT] Learned Synaptic Weights (Hidden -> Threat LIF):
+  Synapse [Hidden 0 -> Threat]: 18.71
+  Synapse [Hidden 1 -> Threat]: 18.46
+  Synapse [Hidden 2 -> Threat]: 19.09
+  Synapse [Hidden 3 -> Threat]: 18.87
+  Synapse [Hidden 4 -> Threat]: 19.01
+  Synapse [Hidden 5 -> Threat]: 18.62
+  Synapse [Hidden 6 -> Threat]: 18.66
+  Synapse [Hidden 7 -> Threat]: 19.11
+[SYSTEM] Successfully exported Spiking Readout to thurs_snn_readout.bin

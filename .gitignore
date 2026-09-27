@@ -1,3 +1,10 @@
-Wednesday-workingHours.pcap
+*.pcap
 
 /build
+
+commands.txt
+
+full_benchmark_report.txt
+combine_reports.ps1
+
+*.csv

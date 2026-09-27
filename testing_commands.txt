@@ -1,0 +1,94 @@
+# ==============================================================================
+# cppIDS Evaluation & Testing Commands (Working Dir: cppIDS\build)
+# ==============================================================================
+
+# ==============================================================================
+# 1. CORE SNN RESERVOIR TESTS
+# ==============================================================================
+
+# --- 1.1 Default Unsupervised Online STDP (No Flags) ---
+./eval_harness --attackers 172.16.0.1 --victims 192.168.10.50 --ports 80,443 ..\Wednesday-workingHours.pcap
+./eval_harness --attackers 172.16.0.1 --victims 192.168.10.50 --ports 80,443 Thursday-Morning-WebAttacks.pcap
+./eval_harness --attackers 192.168.10.8 --victims 192.168.10.5,192.168.10.9,192.168.10.12,192.168.10.14,192.168.10.15,192.168.10.16,192.168.10.17,192.168.10.19,192.168.10.25,192.168.10.50 Thursday-Afternoon-Infiltration.pcap
+
+# --- 1.2 Frozen Inference (--test wednesday_model.bin) ---
+./eval_harness --test wednesday_model.bin --attackers 172.16.0.1 --victims 192.168.10.50 --ports 80,443 ..\Wednesday-workingHours.pcap
+./eval_harness --test wednesday_model.bin --attackers 172.16.0.1 --victims 192.168.10.50 --ports 80,443 Thursday-Morning-WebAttacks.pcap
+./eval_harness --test wednesday_model.bin --attackers 192.168.10.8 --victims 192.168.10.5,192.168.10.9,192.168.10.12,192.168.10.14,192.168.10.15,192.168.10.16,192.168.10.17,192.168.10.19,192.168.10.25,192.168.10.50 Thursday-Afternoon-Infiltration.pcap
+
+# --- 1.3 Online Adaptation / Transfer (--transfer wednesday_model.bin) ---
+./eval_harness --transfer wednesday_model.bin --attackers 172.16.0.1 --victims 192.168.10.50 --ports 80,443 ..\Wednesday-workingHours.pcap
+./eval_harness --transfer wednesday_model.bin --attackers 172.16.0.1 --victims 192.168.10.50 --ports 80,443 Thursday-Morning-WebAttacks.pcap
+./eval_harness --transfer wednesday_model.bin --attackers 192.168.10.8 --victims 192.168.10.5,192.168.10.9,192.168.10.12,192.168.10.14,192.168.10.15,192.168.10.16,192.168.10.17,192.168.10.19,192.168.10.25,192.168.10.50 Thursday-Afternoon-Infiltration.pcap
+
+# --- 1.4 Frozen Inference (--test combined_model.bin) ---
+./eval_harness --test combined_model.bin --attackers 172.16.0.1 --victims 192.168.10.50 --ports 80,443 ..\Wednesday-workingHours.pcap
+./eval_harness --test combined_model.bin --attackers 172.16.0.1 --victims 192.168.10.50 --ports 80 Thursday-Morning-WebAttacks.pcap
+./eval_harness --test combined_model.bin --attackers 192.168.10.8 --victims 192.168.10.5,192.168.10.9,192.168.10.12,192.168.10.14,192.168.10.15,192.168.10.16,192.168.10.17,192.168.10.19,192.168.10.25,192.168.10.50 Thursday-Afternoon-Infiltration.pcap
+
+# --- 1.5 Online Adaptation / Transfer (--transfer combined_model.bin) ---
+./eval_harness --transfer combined_model.bin --attackers 172.16.0.1 --victims 192.168.10.50 --ports 80,443 ..\Wednesday-workingHours.pcap
+./eval_harness --transfer combined_model.bin --attackers 172.16.0.1 --victims 192.168.10.50 --ports 80 Thursday-Morning-WebAttacks.pcap
+./eval_harness --transfer combined_model.bin --attackers 192.168.10.8 --victims 192.168.10.5,192.168.10.9,192.168.10.12,192.168.10.14,192.168.10.15,192.168.10.16,192.168.10.17,192.168.10.19,192.168.10.25,192.168.10.50 Thursday-Afternoon-Infiltration.pcap
+
+# ==============================================================================
+# 2. NEUROMORPHIC SPIKING READOUT (R-STDP) TESTS
+# ==============================================================================
+
+# ------------------------------------------------------------------------------
+# WEDNESDAY-TRAINED SPIKING READOUT
+# ------------------------------------------------------------------------------
+
+# --- Step 1: Train R-STDP Readout on Wednesday (Requires frozen Wed baseline) ---
+./eval_harness --base-model wednesday_model.bin --train-snn-readout wednesday_snn_readout.bin --attackers 172.16.0.1 --victims 192.168.10.50 --ports 80,443 ..\Wednesday-workingHours.pcap
+
+# --- Step 2: Frozen Readout Inference (Test Wednesday model across all datasets) ---
+./eval_harness --base-model wednesday_model.bin --test-snn-readout wednesday_snn_readout.bin --attackers 172.16.0.1 --victims 192.168.10.50 --ports 80,443 ..\Wednesday-workingHours.pcap
+./eval_harness --base-model wednesday_model.bin --test-snn-readout wednesday_snn_readout.bin --attackers 172.16.0.1 --victims 192.168.10.50 --ports 80 Thursday-Morning-WebAttacks.pcap
+./eval_harness --base-model wednesday_model.bin --test-snn-readout wednesday_snn_readout.bin --attackers 192.168.10.8 --victims 192.168.10.5,192.168.10.9,192.168.10.12,192.168.10.14,192.168.10.15,192.168.10.16,192.168.10.17,192.168.10.19,192.168.10.25,192.168.10.50 Thursday-Afternoon-Infiltration.pcap
+
+# ------------------------------------------------------------------------------
+# COMBINED (MULTI-DATASET) SPIKING READOUT
+# ------------------------------------------------------------------------------
+
+# --- Step 1: Train Combined R-STDP Readout across both PCAPs (Requires frozen Combined baseline) ---
+./eval_harness --base-model combined_model.bin --train-snn-readout combined_snn_readout.bin --attackers 172.16.0.1,192.168.10.8 --victims 192.168.10.5,192.168.10.9,192.168.10.12,192.168.10.14,192.168.10.15,192.168.10.16,192.168.10.17,192.168.10.19,192.168.10.25,192.168.10.50 ..\Wednesday-workingHours.pcap Thursday-Afternoon-Infiltration.pcap
+
+# --- Step 2: Frozen Readout Inference (Test Combined model across all datasets) ---
+./eval_harness --base-model combined_model.bin --test-snn-readout combined_snn_readout.bin --attackers 172.16.0.1 --victims 192.168.10.50 --ports 80,443 ..\Wednesday-workingHours.pcap
+./eval_harness --base-model combined_model.bin --test-snn-readout combined_snn_readout.bin --attackers 192.168.10.8 --victims 192.168.10.5,192.168.10.9,192.168.10.12,192.168.10.14,192.168.10.15,192.168.10.16,192.168.10.17,192.168.10.19,192.168.10.25,192.168.10.50 Thursday-Afternoon-Infiltration.pcap
+./eval_harness --base-model combined_model.bin --test-snn-readout combined_snn_readout.bin --attackers 172.16.0.1 --victims 192.168.10.50 --ports 80 Thursday-Morning-WebAttacks.pcap
+
+
+# ==============================================================================
+# 1. WEDNESDAY-TRAINED LR MODEL
+# ==============================================================================
+
+# --- Step 1: Fit LR Model on Wednesday ---
+./eval_harness --base-model wednesday_model.bin --train-lr wednesday_lr_model.bin --attackers 172.16.0.1 --victims 192.168.10.50 --ports 80,443 ..\Wednesday-workingHours.pcap
+
+# --- Step 2: Test Wednesday Model on Wednesday (In-Domain Performance) ---
+./eval_harness --base-model wednesday_model.bin --test-lr wednesday_lr_model.bin --attackers 172.16.0.1 --victims 192.168.10.50 --ports 80,443 ..\Wednesday-workingHours.pcap
+
+# --- Step 3: Test Wednesday Model on Thursday Morning (Zero-Shot Web Attacks) ---
+./eval_harness --base-model wednesday_model.bin --test-lr wednesday_lr_model.bin --attackers 172.16.0.1 --victims 192.168.10.50 --ports 80 Thursday-Morning-WebAttacks.pcap
+
+# --- Step 4: Test Wednesday Model on Thursday Afternoon (Zero-Shot Infiltration) ---
+./eval_harness --base-model wednesday_model.bin --test-lr wednesday_lr_model.bin --attackers 192.168.10.8 --victims 192.168.10.5,192.168.10.9,192.168.10.12,192.168.10.14,192.168.10.15,192.168.10.16,192.168.10.17,192.168.10.19,192.168.10.25,192.168.10.50 Thursday-Afternoon-Infiltration.pcap
+
+
+# ==============================================================================
+# 2. COMBINED (MULTI-DATASET) LR MODEL
+# ==============================================================================
+
+# --- Step 1: Fit Combined LR Model across both PCAPs ---
+./eval_harness --base-model combined_model.bin --train-lr combined_lr_model.bin --attackers 172.16.0.1,192.168.10.8 --victims 192.168.10.5,192.168.10.9,192.168.10.12,192.168.10.14,192.168.10.15,192.168.10.16,192.168.10.17,192.168.10.19,192.168.10.25,192.168.10.50 ..\Wednesday-workingHours.pcap Thursday-Afternoon-Infiltration.pcap
+
+# --- Step 2: Test Combined Model on Wednesday ---
+./eval_harness --base-model combined_model.bin --test-lr combined_lr_model.bin --attackers 172.16.0.1 --victims 192.168.10.50 --ports 80,443 ..\Wednesday-workingHours.pcap
+
+# --- Step 3: Test Combined Model on Thursday Afternoon ---
+./eval_harness --base-model combined_model.bin --test-lr combined_lr_model.bin --attackers 192.168.10.8 --victims 192.168.10.5,192.168.10.9,192.168.10.12,192.168.10.14,192.168.10.15,192.168.10.16,192.168.10.17,192.168.10.19,192.168.10.25,192.168.10.50 Thursday-Afternoon-Infiltration.pcap
+
+# --- Step 4: Test Combined Model on Thursday Morning (Unseen Web Attacks) ---
+./eval_harness --base-model combined_model.bin --test-lr combined_lr_model.bin --attackers 172.16.0.1 --victims 192.168.10.50 --ports 80 Thursday-Morning-WebAttacks.pcap

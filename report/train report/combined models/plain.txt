@@ -1,0 +1,119 @@
+PS C:\dev\moksha\mokshaIDS\cppIDS\build> ./eval_harness --train combined_model.bin --attackers 172.16.0.1,192.168.10.8 --victims 192.168.10.5,192.168.10.9,192.168.10.12,192.168.10.14,192.168.10.15,192.168.10.16,192.168.10.17,192.168.10.19,192.168.10.25,192.168.10.50 ..\Wednesday-workingHours.pcap Thursday-Afternoon-Infiltration.pcap
+=== Running cppIDS Benchmark Evaluation Harness ===
+[SYSTEM] Mode: TRAIN (STDP Enabled, Baseline Export Pending)
+[SYSTEM] Ground Truth Attackers Registered: 172.16.0.1,192.168.10.8
+[BENCHMARK] Replaying packets from ..\Wednesday-workingHours.pcap
+[BENCHMARK] Packets processed: 13788878
+[BENCHMARK] Replaying packets from Thursday-Afternoon-Infiltration.pcap
+[BENCHMARK] Packets processed: 4822025
+
+
+=======================================================
+          cppIDS Benchmark Evaluation Report
+=======================================================
+
+[1. CORE IDS CLASSIFICATION METRICS]
+True Positives (TP):       236208
+True Negatives (TN):       498272
+False Positives (FP):      12766
+False Negatives (FN):      6075
+Precision:                 94.87%
+Recall / Detection Rate:   97.49%
+F1-Score:                  96.16%
+Classification Accuracy:   97.50%
+False Positive Rate:       2.50%
+False Negative Rate:       2.51%
+
+[2. RUNTIME & LATENCY BENCHMARKS]
+Packets Processed:         18610903
+Packets Skipped:           142484
+Malformed/Invalid Pkts:    0
+Dropped/Evicted Flows:     0
+Min Latency:               0 us
+Avg Latency:               1.06 us
+Histogram Overflow (>1ms): 980 packets
+Median Latency (P50):      0 us
+P95 Latency:               2 us
+P99 Latency:               10 us
+Max Latency:               361320 us
+Final Working Set RAM:     140 MB
+Throughput:                84451 PPS
+
+[3. CONTEXTUAL FALSE-POSITIVE SUPPRESSION]
+Anomalies Detected (SNN):  611053
+Anomalies Dismissed (Ctx): 362079
+Threats Confirmed:         248974
+Context Matches:           362079
+Context Mismatches:        248974
+Context Anomaly Dismissal: 59.25%
+
+[4. THREAT CONFIRMATION REASON BREAKDOWN]
+Pair Volumetric Flood:     TP = 236201, FP = 12714
+Slow DoS Heuristic:        TP = 0, FP = 4
+Spike Count Persistence:   TP = 7, FP = 48
+
+=======================================================
+             FALSE POSITIVE DIAGNOSTICS
+=======================================================
+
+[Top 10 FP Service Ports]
+  Port 443 -> 8173 flows
+  Port 43216 -> 57 flows
+  Port 40920 -> 56 flows
+  Port 50122 -> 30 flows
+  Port 465 -> 28 flows
+  Port 51296 -> 25 flows
+  Port 1 -> 16 flows
+  Port 444 -> 15 flows
+  Port 49666 -> 9 flows
+  Port 1036 -> 6 flows
+
+[Top 10 FP IP Pairs]
+  192.168.10.8 <-> 192.168.10.51 (3386 flows)
+  192.168.10.5 <-> 162.208.20.178 (3170 flows)
+  192.168.10.5 <-> 162.208.22.34 (2561 flows)
+  192.168.10.25 <-> 142.0.160.53 (1642 flows)
+  172.16.0.1 <-> 192.168.10.51 (863 flows)
+  192.168.10.8 <-> 199.244.49.56 (420 flows)
+  192.168.10.51 <-> 192.168.10.8 (228 flows)
+  192.168.10.25 <-> 151.101.209.127 (122 flows)
+  192.168.10.15 <-> 178.172.160.3 (86 flows)
+  192.168.10.17 <-> 178.172.160.3 (60 flows)
+
+=======================================================
+             FALSE NEGATIVE DIAGNOSTICS
+=======================================================
+
+[Top 10 FN Service Ports]
+  Port 80 -> 564 flows
+  Port 135 -> 306 flows
+  Port 22 -> 274 flows
+  Port 139 -> 267 flows
+  Port 445 -> 259 flows
+  Port 21 -> 142 flows
+  Port 137 -> 107 flows
+  Port 443 -> 72 flows
+  Port 389 -> 62 flows
+  Port 5432 -> 62 flows
+
+[Top 10 FN IP Pairs]
+  192.168.10.8 <-> 192.168.10.50 (791 flows)
+  192.168.10.8 <-> 192.168.10.5 (729 flows)
+  192.168.10.8 <-> 192.168.10.9 (603 flows)
+  192.168.10.8 <-> 192.168.10.15 (485 flows)
+  192.168.10.8 <-> 192.168.10.14 (483 flows)
+  192.168.10.8 <-> 192.168.10.19 (469 flows)
+  192.168.10.8 <-> 192.168.10.12 (467 flows)
+  192.168.10.8 <-> 192.168.10.17 (466 flows)
+  192.168.10.8 <-> 192.168.10.16 (465 flows)
+  192.168.10.8 <-> 192.168.10.25 (389 flows)
+
+[SNN EXPORT] Inspecting Stratified Weights:
+[SNN EXPORT] Averaged synaptic weights per channel:
+  Channel 0 Avg: 0.69
+  Channel 1 Avg: 0.67
+  Channel 2 Avg: 0.68
+  Channel 3 Avg: 3.28
+  Channel 4 Avg: 0.70
+  Channel 5 Avg: 0.70
+[SYSTEM] Successfully exported Threat Baseline to combined_model.bin

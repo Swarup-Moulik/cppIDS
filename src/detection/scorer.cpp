@@ -3,13 +3,19 @@
 #include "../core/telemetry.h"
 #include "../features/flow_tracker.h"
 #include "../neuromorphic/snn_core.h"
+#include "../neuromorphic/snn_readout.h"
+#include "logistic_model.h"
+#include "readout_features.h"
 
+// Operational parameters controlling threshold scoring and homeostasis
 static uint32_t g_alert_threshold = 45;
 static float g_fire_threshold = 5000.0f;
 static uint64_t g_cooldown_ms = 10000;
 static float g_homeostatic_step = 1500.0f;
 static float g_homeostatic_max_penalty = 25000.0f;
 
+/* @brief Sets scoring thresholds, SNN firing limits, and alert suppression
+ * cooldowns */
 void set_scorer_config(uint32_t alert_thresh, float fire_thresh,
                        uint64_t cooldown) {
   g_alert_threshold = alert_thresh;
@@ -17,15 +23,19 @@ void set_scorer_config(uint32_t alert_thresh, float fire_thresh,
   g_cooldown_ms = cooldown;
 }
 
+/* @brief Validates if at least one port resides in the ephemeral or
+ * non-privileged range */
 static inline bool has_ephemeral(uint16_t p1, uint16_t p2) {
   return (p1 >= 1024 || p2 >= 1024 || p1 == p2);
 }
 
+/* @brief Checks if a flow endpoint matches a specified target service port */
 static inline bool match_service_port(uint16_t p1, uint16_t p2,
                                       uint16_t target) {
   return has_ephemeral(p1, p2) && (p1 == target || p2 == target);
 }
 
+/* @brief Identifies common HTTP/HTTPS and web proxy service ports */
 static inline bool match_web_ports(uint16_t p1, uint16_t p2) {
   if (!has_ephemeral(p1, p2))
     return false;
@@ -36,6 +46,7 @@ static inline bool match_web_ports(uint16_t p1, uint16_t p2) {
   return is_web(p1) || is_web(p2);
 }
 
+/* @brief Identifies common email and file transfer service ports */
 static inline bool match_email_ftp(uint16_t p1, uint16_t p2) {
   if (!has_ephemeral(p1, p2))
     return false;
@@ -46,6 +57,7 @@ static inline bool match_email_ftp(uint16_t p1, uint16_t p2) {
   return is_ef(p1) || is_ef(p2);
 }
 
+/* @brief Identifies enterprise administrative and directory service ports */
 static inline bool match_enterprise(uint16_t p1, uint16_t p2) {
   if (!has_ephemeral(p1, p2))
     return false;
@@ -57,9 +69,12 @@ static inline bool match_enterprise(uint16_t p1, uint16_t p2) {
   return is_ent(p1) || is_ent(p2);
 }
 
-void on_anomaly_detected(uint32_t flow_hash, uint32_t channel_id,
+/* @brief Evaluates an SNN neuron spike to update flow episodes and classify
+ * security threats */
+void on_anomaly_detected(uint64_t flow_hash, uint32_t channel_id,
                          uint32_t raw_potential, uint64_t current_time_us) {
 
+  // Scale potential overflow into a normalized magnitude score
   float overflow = static_cast<float>(raw_potential) - g_fire_threshold;
   float anomaly_magnitude =
       (overflow > 0.0f) ? (overflow / (g_fire_threshold * 0.5f)) : 0.0f;
@@ -81,6 +96,8 @@ void on_anomaly_detected(uint32_t flow_hash, uint32_t channel_id,
     bool emit_alert = false;
     std::string event_stage = "";
 
+    // Manage threat episode lifecycle: initialize new episodes or escalate
+    // existing ones
     if (flow.episode_active == 0) {
       flow.episode_active = 1;
       flow.episode_start_time = current_ms;
@@ -111,6 +128,7 @@ void on_anomaly_detected(uint32_t flow_hash, uint32_t channel_id,
         flow.episode_peak_magnitude_ever = score;
       }
 
+      // Map channel IDs to descriptive anomaly labels
       std::string threat_type = "Payload Prediction Error";
       if (channel_id == 1)
         threat_type = "Temporal Rhythm Divergence";
@@ -130,6 +148,7 @@ void on_anomaly_detected(uint32_t flow_hash, uint32_t channel_id,
       uint32_t dest_octet1 = (flow.dest_ip >> 24) & 255;
       bool is_multicast = (dest_octet1 >= 224 && dest_octet1 <= 239);
 
+      // Check for bidirectional IP volumetric pair surges
       uint64_t pair_fwd =
           (static_cast<uint64_t>(flow.src_ip) << 32) | flow.dest_ip;
       uint64_t pair_rev =
@@ -139,6 +158,7 @@ void on_anomaly_detected(uint32_t flow_hash, uint32_t channel_id,
 
       uint16_t p1 = flow.dest_port, p2 = flow.src_port;
 
+      // Extract service classifications
       bool is_discovery =
           (flow.protocol == 17 && (match_service_port(p1, p2, 5353) ||
                                    match_service_port(p1, p2, 1900) ||
@@ -162,6 +182,63 @@ void on_anomaly_detected(uint32_t flow_hash, uint32_t channel_id,
           (flow.protocol == 17 && (match_service_port(p1, p2, 27015) ||
                                    match_service_port(p1, p2, 7777)));
 
+      // =========================================================
+      // PHASE 2A: NEUROMORPHIC SPIKING READOUT WITH FFI
+      // =========================================================
+      if (snn_readout_is_enabled()) {
+        // Apply feed-forward inhibition on known benign context
+        if (is_dns || is_ntp || is_dhcp || is_enterprise || is_ssh || is_game) {
+          snn_readout_inject_inhibition(flow_hash, 500.0f, current_time_us);
+          return;
+        }
+
+        if ((is_web || is_email_ftp) && !is_dos_flood) {
+          snn_readout_inject_inhibition(flow_hash, 500.0f, current_time_us);
+          return;
+        }
+
+        // Confirm threat if the downstream LIF neuron fired
+        if (snn_readout_has_fired(flow_hash)) {
+          if (flow.threat_confirmed == 0) {
+            flow.threat_confirmed = 1;
+            flow.confirm_reason = CONFIRM_SPIKE_COUNT;
+            flow.confirmed_channel = channel_id;
+            log_event(event_stage, "Neuromorphic Spiking Readout", threat_type,
+                      flow_hash, flow.src_ip, flow.dest_ip, flow.src_port,
+                      flow.dest_port, proto_str, 999, current_time_us);
+          }
+        }
+        return;
+      }
+
+      // =========================================================
+      // PHASE 2B: BATCH LOGISTIC REGRESSION READOUT INFERENCE
+      // =========================================================
+      if (lr_readout_is_enabled() && !lr_readout_is_collecting()) {
+        auto feat = compute_readout_features(flow);
+        float prob = lr_get_model().predict_proba(feat);
+
+        if (prob > 0.50f) {
+          if (flow.threat_confirmed == 0) {
+            flow.threat_confirmed = 1;
+            flow.confirm_reason = CONFIRM_SPIKE_COUNT;
+            flow.confirmed_channel = channel_id;
+            log_event(event_stage, "Logistic Readout Threat", threat_type,
+                      flow_hash, flow.src_ip, flow.dest_ip, flow.src_port,
+                      flow.dest_port, proto_str,
+                      static_cast<uint32_t>(prob * 100.0f), current_time_us);
+          }
+        } else {
+          flow.episode_peak_magnitude = 0;
+          snn_apply_homeostasis(flow_hash, g_homeostatic_step,
+                                g_homeostatic_max_penalty);
+        }
+        return;
+      }
+
+      // =========================================================
+      // PHASE 1: DETERMINISTIC CONTEXT HEURISTICS
+      // =========================================================
       if (is_multicast && is_discovery) {
         flow.episode_peak_magnitude = 0;
         snn_apply_homeostasis(flow_hash, g_homeostatic_step,
@@ -169,9 +246,7 @@ void on_anomaly_detected(uint32_t flow_hash, uint32_t channel_id,
         return;
       }
 
-      // FIX: Only grant the volumetric flood exception to true persistent
-      // stream protocols. UDP infrastructure (DNS/NTP) is naturally volumetric
-      // across ephemeral ports.
+      // Volumetric flood confirmation for persistent stream protocols
       bool has_flood_escape = is_web || is_email_ftp;
 
       if (has_flood_escape && channel_id == 3 && is_dos_flood && score > 500) {
@@ -186,8 +261,7 @@ void on_anomaly_detected(uint32_t flow_hash, uint32_t channel_id,
         return;
       }
 
-      // Suppress benign matches, unconditionally dropping DNS, NTP, DHCP, and
-      // Enterprise
+      // Suppress benign matches across common infrastructure services
       if (is_web || is_email_ftp || is_dns || is_ntp || is_dhcp ||
           is_enterprise || is_ssh || is_game) {
         flow.episode_peak_magnitude = 0;
@@ -201,6 +275,7 @@ void on_anomaly_detected(uint32_t flow_hash, uint32_t channel_id,
       bool is_slow_dos = ((channel_id == 1 || channel_id == 4) && score > 850 &&
                           flow.episode_spike_count >= 2);
 
+      // Evaluate confirmation criteria
       ConfirmReason reason = CONFIRM_NONE;
       if (channel_id == 3 && is_dos_flood && score > 500) {
         reason = CONFIRM_PAIR_FLOOD;
@@ -210,6 +285,7 @@ void on_anomaly_detected(uint32_t flow_hash, uint32_t channel_id,
         reason = CONFIRM_SPIKE_COUNT;
       }
 
+      // Commit alert or apply homeostatic suppression
       if (reason != CONFIRM_NONE) {
         if (flow.threat_confirmed == 0) {
           flow.threat_confirmed = 1;
@@ -228,4 +304,5 @@ void on_anomaly_detected(uint32_t flow_hash, uint32_t channel_id,
   }
 }
 
+/* @brief Binds on_anomaly_detected as the target SNN core spike callback */
 void init_scorer() { snn_register_callback(on_anomaly_detected); }

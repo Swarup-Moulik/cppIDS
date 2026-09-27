@@ -5,13 +5,13 @@
 extern "C" {
 #endif
 
-// Define the callback signature for Moksha and C++ interop
+/* @brief Callback signature for handling process interruption signals */
 typedef void (*sigint_callback_t)(int);
 
-// Expose the registration function
+/* @brief Registers an application callback to execute upon receiving SIGINT */
 void register_sigint_handler(sigint_callback_t handler);
 
-// Expose the polling function
+/* @brief Returns true if a shutdown interrupt has been requested */
 bool shutdown_was_requested(void);
 
 #ifdef __cplusplus

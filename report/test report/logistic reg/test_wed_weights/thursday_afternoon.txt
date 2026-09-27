@@ -1,0 +1,108 @@
+PS C:\dev\moksha\mokshaIDS\cppIDS\build> ./eval_harness --base-model wednesday_model.bin --test-lr wednesday_lr_model.bin --attackers 192.168.10.8 --victims 192.168.10.5,192.168.10.9,192.168.10.12,192.168.10.14,192.168.10.15,192.168.10.16,192.168.10.17,192.168.10.19,192.168.10.25,192.168.10.50 Thursday-Afternoon-Infiltration.pcap
+=== Running cppIDS Benchmark Evaluation Harness ===
+[SYSTEM] Pre-trained SNN BASELINE loaded from wednesday_model.bin
+[SYSTEM] Mode: TEST BATCH LOGISTIC REGRESSION (Inference Active)
+[SYSTEM] Ground Truth Attackers Registered: 192.168.10.8
+[BENCHMARK] Replaying packets from Thursday-Afternoon-Infiltration.pcap
+[BENCHMARK] Packets processed: 4822025
+
+
+=======================================================
+          cppIDS Benchmark Evaluation Report
+=======================================================
+
+[1. CORE IDS CLASSIFICATION METRICS]
+True Positives (TP):       559
+True Negatives (TN):       192395
+False Positives (FP):      7374
+False Negatives (FN):      61043
+Precision:                 7.05%
+Recall / Detection Rate:   0.91%
+F1-Score:                  1.61%
+Classification Accuracy:   73.82%
+False Positive Rate:       3.69%
+False Negative Rate:       99.09%
+
+[2. RUNTIME & LATENCY BENCHMARKS]
+Packets Processed:         4822025
+Packets Skipped:           58561
+Malformed/Invalid Pkts:    0
+Dropped/Evicted Flows:     0
+Min Latency:               0 us
+Avg Latency:               0.65 us
+Histogram Overflow (>1ms): 52 packets
+Median Latency (P50):      0 us
+P95 Latency:               1 us
+P99 Latency:               4 us
+Max Latency:               53669 us
+Final Working Set RAM:     138 MB
+Throughput:                121470 PPS
+
+[3. CONTEXTUAL FALSE-POSITIVE SUPPRESSION]
+Anomalies Detected (SNN):  186267
+Anomalies Dismissed (Ctx): 178334
+Threats Confirmed:         7933
+Context Matches:           178334
+Context Mismatches:        7933
+Context Anomaly Dismissal: 95.74%
+
+[4. THREAT CONFIRMATION REASON BREAKDOWN]
+Pair Volumetric Flood:     TP = 0, FP = 0
+Slow DoS Heuristic:        TP = 0, FP = 0
+Spike Count Persistence:   TP = 559, FP = 7374
+
+=======================================================
+             FALSE POSITIVE DIAGNOSTICS
+=======================================================
+
+[Top 10 FP Service Ports]
+  Port 443 -> 4170 flows
+  Port 80 -> 3173 flows
+  Port 8000 -> 6 flows
+  Port 3128 -> 5 flows
+  Port 8080 -> 4 flows
+  Port 4443 -> 4 flows
+  Port 8443 -> 4 flows
+  Port 8008 -> 3 flows
+  Port 8888 -> 3 flows
+  Port 2129 -> 1 flows
+
+[Top 10 FP IP Pairs]
+  192.168.10.8 <-> 199.244.49.56 (371 flows)
+  192.168.10.9 <-> 23.60.139.27 (57 flows)
+  192.168.10.5 <-> 23.60.139.27 (39 flows)
+  192.168.10.14 <-> 97.64.84.112 (39 flows)
+  192.168.10.5 <-> 178.255.83.1 (35 flows)
+  192.168.10.8 <-> 104.25.131.104 (34 flows)
+  192.168.10.8 <-> 23.54.187.27 (30 flows)
+  192.168.10.8 <-> 192.168.10.51 (29 flows)
+  192.168.10.14 <-> 23.54.187.27 (29 flows)
+  192.168.10.9 <-> 50.63.243.230 (27 flows)
+
+=======================================================
+             FALSE NEGATIVE DIAGNOSTICS
+=======================================================
+
+[Top 10 FN Service Ports]
+  Port 135 -> 306 flows
+  Port 139 -> 267 flows
+  Port 445 -> 259 flows
+  Port 22 -> 165 flows
+  Port 21 -> 152 flows
+  Port 1 -> 146 flows
+  Port 1042 -> 121 flows
+  Port 1041 -> 121 flows
+  Port 1026 -> 120 flows
+  Port 1037 -> 117 flows
+
+[Top 10 FN IP Pairs]
+  192.168.10.8 <-> 192.168.10.5 (12042 flows)
+  192.168.10.8 <-> 192.168.10.15 (8035 flows)
+  192.168.10.8 <-> 192.168.10.14 (8033 flows)
+  192.168.10.8 <-> 192.168.10.25 (6126 flows)
+  192.168.10.8 <-> 192.168.10.9 (5570 flows)
+  192.168.10.8 <-> 192.168.10.50 (4286 flows)
+  192.168.10.8 <-> 192.168.10.17 (3902 flows)
+  192.168.10.8 <-> 192.168.10.19 (3880 flows)
+  192.168.10.8 <-> 192.168.10.16 (3861 flows)
+  192.168.10.8 <-> 192.168.10.12 (3840 flows)

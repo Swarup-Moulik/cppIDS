@@ -1,0 +1,102 @@
+PS C:\dev\moksha\mokshaIDS\cppIDS\build> ./eval_harness --base-model wednesday_model.bin --train-snn-readout wednesday_snn_readout.bin --attackers 172.16.0.1 --victims 192.168.10.50 --ports 80,443 ..\Wednesday-workingHours.pcap
+=== Running cppIDS Benchmark Evaluation Harness ===
+[SYSTEM] Pre-trained SNN BASELINE loaded from wednesday_model.bin
+[SYSTEM] Mode: TRAIN SNN READOUT (R-STDP Active)
+[SYSTEM] Ground Truth Attackers Registered: 172.16.0.1
+[BENCHMARK] Replaying packets from ..\Wednesday-workingHours.pcap
+[BENCHMARK] Packets processed: 13788878
+
+
+=======================================================
+          cppIDS Benchmark Evaluation Report
+=======================================================
+
+[1. CORE IDS CLASSIFICATION METRICS]
+True Positives (TP):       16445
+True Negatives (TN):       310685
+False Positives (FP):      933
+False Negatives (FN):      163942
+Precision:                 94.63%
+Recall / Detection Rate:   9.12%
+F1-Score:                  16.63%
+Classification Accuracy:   66.49%
+False Positive Rate:       0.30%
+False Negative Rate:       90.88%
+
+[2. RUNTIME & LATENCY BENCHMARKS]
+Packets Processed:         13788878
+Packets Skipped:           83923
+Malformed/Invalid Pkts:    0
+Dropped/Evicted Flows:     0
+Min Latency:               0 us
+Avg Latency:               0.67 us
+Histogram Overflow (>1ms): 152 packets
+Median Latency (P50):      0 us
+P95 Latency:               2 us
+P99 Latency:               4 us
+Max Latency:               68910 us
+Final Working Set RAM:     140 MB
+Throughput:                96904 PPS
+
+[3. CONTEXTUAL FALSE-POSITIVE SUPPRESSION]
+Anomalies Detected (SNN):  375924
+Anomalies Dismissed (Ctx): 358546
+Threats Confirmed:         17378
+Context Matches:           358546
+Context Mismatches:        17378
+Context Anomaly Dismissal: 95.38%
+
+[4. THREAT CONFIRMATION REASON BREAKDOWN]
+Pair Volumetric Flood:     TP = 0, FP = 0
+Slow DoS Heuristic:        TP = 0, FP = 0
+Spike Count Persistence:   TP = 16445, FP = 933
+
+=======================================================
+             FALSE POSITIVE DIAGNOSTICS
+=======================================================
+
+[Top 10 FP Service Ports]
+  Port 443 -> 653 flows
+  Port 80 -> 62 flows
+  Port 5355 -> 47 flows
+  Port 5353 -> 34 flows
+  Port 465 -> 11 flows
+  Port 8610 -> 7 flows
+  Port 49666 -> 7 flows
+  Port 8612 -> 7 flows
+  Port 49671 -> 2 flows
+  Port 25028 -> 1 flows
+
+[Top 10 FP IP Pairs]
+  192.168.10.5 <-> 162.208.20.178 (259 flows)
+  192.168.10.5 <-> 162.208.22.34 (225 flows)
+  192.168.10.12 <-> 178.172.160.4 (48 flows)
+  192.168.10.15 <-> 178.172.160.3 (48 flows)
+  192.168.10.25 <-> 151.101.209.127 (42 flows)
+  192.168.10.3 <-> 224.0.0.252 (42 flows)
+  192.168.10.25 <-> 52.84.86.104 (31 flows)
+  192.168.10.51 <-> 192.168.10.50 (22 flows)
+  192.168.10.16 <-> 192.168.10.50 (19 flows)
+  192.168.10.19 <-> 113.29.190.10 (19 flows)
+
+=======================================================
+             FALSE NEGATIVE DIAGNOSTICS
+=======================================================
+
+[Top 10 FN Service Ports]
+  Port 80 -> 163942 flows
+
+[Top 10 FN IP Pairs]
+  172.16.0.1 <-> 192.168.10.50 (161384 flows)
+  192.168.10.50 <-> 172.16.0.1 (2558 flows)
+
+[SNN READOUT EXPORT] Learned Synaptic Weights (Hidden -> Threat LIF):
+  Synapse [Hidden 0 -> Threat]: 5.00
+  Synapse [Hidden 1 -> Threat]: 5.00
+  Synapse [Hidden 2 -> Threat]: 5.00
+  Synapse [Hidden 3 -> Threat]: 5.00
+  Synapse [Hidden 4 -> Threat]: 5.00
+  Synapse [Hidden 5 -> Threat]: 5.00
+  Synapse [Hidden 6 -> Threat]: 5.00
+  Synapse [Hidden 7 -> Threat]: 5.00
+[SYSTEM] Successfully exported Spiking Readout to wednesday_snn_readout.bin
