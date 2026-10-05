@@ -218,9 +218,18 @@ Refer to the reports folder for detailed performance metrics and benchmark resul
 
 **My PC specs (HP 15-da0077tx):**
 
-* **Processor (CPU):** Intel Core i5-8250U (8th Gen, Quad-Core, 1.6 GHz base up to 3.4 GHz, 8 Threads, 6 MB Cache)
-* **Memory (RAM):** 8 GB DDR4 (2400 MHz)
-* **Graphics (GPU):** NVIDIA GeForce MX110 with 2 GB Dedicated VRAM
-* **Storage:** 1 TB SATA HDD (5400 rpm)
-* **Display:** 15.6-inch Full HD (1920 x 1080) Anti-Glare LED-backlit
-* **Operating System (Factory):** Windows 10
+- **Processor (CPU):** Intel Core i5-8250U (8th Gen, Quad-Core, 1.6 GHz base up to 3.4 GHz, 8 Threads, 6 MB Cache)
+- **Memory (RAM):** 8 GB DDR4 (2400 MHz)
+- **Graphics (GPU):** NVIDIA GeForce MX110 with 2 GB Dedicated VRAM
+- **Storage:** 1 TB SATA HDD (5400 rpm)
+- **Display:** 15.6-inch Full HD (1920 x 1080) Anti-Glare LED-backlit
+- **Operating System (Factory):** Windows 10
+
+## 8. Acknowledgements & Research Inspirations
+
+The foundational knowledge and inspiration for utilizing Spiking Neural Networks (SNNs) in this project were initially discovered through discussions and resources shared within the **Open Neuromorphic Discord server**.
+
+Additionally, the event-driven architectures and algorithms developed for `cppIDS` draw heavily on recent breakthroughs in neuromorphic cyber-security literature:
+
+- **Event-Driven Intrusion Detection for Edge & IoT:** Prajwalasimha S N et al. (2025) designed an event-driven IDS framework utilizing biologically plausible SNNs and Spike-Timing Dependent Plasticity (STDP). Their research highlights how spike-based communication provides energy-efficient, real-time anomaly detection ideally suited for resource-constrained edge devices.
+- **Packet-Observation Spiking Neural Networks:** Phu Nguyen Phan Hai et al. (2026) introduced PON, an SNN architecture that combines 1D convolution and Leaky-Integrate-and-Fire (LIF) neurons for IoT intrusion detection directly from packet headers. Their work proved that highly accurate online intrusion detection can be performed without resorting to computationally expensive Deep Packet Inspection (DPI) of payload data.

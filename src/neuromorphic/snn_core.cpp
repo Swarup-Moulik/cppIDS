@@ -195,6 +195,7 @@ void snn_sweep_stale(float max_idle_seconds, uint64_t pkt_time_us) {
 void snn_reset_state() {
   active_snn_states.clear();
   g_total_spikes = g_total_synops = g_total_weights = 0;
+  g_total_firing_neurons = 0;
   g_max_potential = 0.0f;
   g_firing_neurons_window = 0;
   for (int i = 0; i < 5; ++i) {
