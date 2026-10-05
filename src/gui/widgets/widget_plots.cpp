@@ -3,6 +3,7 @@
 #include "imgui.h"
 #include "implot.h"
 #include <algorithm>
+#include <cmath>
 
 namespace widget_plots {
 
