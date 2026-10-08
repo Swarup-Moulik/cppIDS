@@ -4,7 +4,7 @@
 
 [![C++ Standard](https://img.shields.io/badge/C%2B%2B-20-blue.svg)](https://en.cppreference.com/w/cpp/20)
 [![Build System](https://img.shields.io/badge/CMake-3.20%2B-brightgreen.svg)](https://cmake.org/)
-[![License](https://img.shields.io/badge/License-Academic%20Use-lightgrey.svg)](<>)
+[![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](LICENSE)
 
 **NeuroEdge-IDS (`cppIDS`)** is a native C++20, high-throughput neuromorphic Network Intrusion Detection System (NIDS) engineered for resource-constrained edge gateways. By pairing statistical **Predictive Coding (PC)** with event-driven **Spiking Neural Network (SNN)** reservoir dynamics and Spike-Timing-Dependent Plasticity (STDP), `cppIDS` detects volumetric, temporal, and reconnaissance network anomalies at line rate with sub-microsecond latency and a minimal working-set memory footprint.
 
