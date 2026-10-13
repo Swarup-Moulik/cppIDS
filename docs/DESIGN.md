@@ -249,11 +249,10 @@ If $\text{Score} > 45$, the flow's threat episode lifecycle updates:
 
 2. **Context Classification:** Flow endpoints are inspected for known protocol profiles (DNS, NTP, DHCP, NetBIOS, Active Directory, Web, SSH).
 
-3. **Suppression Matrix:**
-
+3. **Suppression Matrix & Telemetry:**
 - Multicast discovery (mDNS, SSDP, LLMNR) is dropped and homeostatically penalized.
-
-- Standard infrastructure ports (DNS, NTP, DHCP, Enterprise RPC/SMB/LDAP, SSH) are dropped, suppressing benign background noise.
+- Standard infrastructure ports (DNS, NTP, DHCP, Enterprise RPC/SMB/LDAP, SSH) are dropped, suppressing benign background noise. 
+- *Ablation & Logging:* Suppressed flows are logged to `whitelist_swallowed_total` and cross-referenced against ground truth (`whitelist_swallowed_malicious`) to quantify the exact cost of the prior. The prior can be bypassed entirely using the `--no-whitelist` flag.
 
 4. **Malicious Threat Confirmation:**
 
@@ -274,7 +273,7 @@ Score > 45 Alert? ──── No ────► Ignore / Sub-threshold
 │ Yes
 ▼
 Context Matches? (DNS/NTP/Enterprise)
-├─── Yes (and not Pair Flood) ───► Suppress & Apply Homeostasis
+├─── Yes (and not Pair Flood) ───► Log Suppression & Apply Homeostasis
 │
 └─── No (or Pair Flood Exception)
 │
@@ -292,8 +291,7 @@ Confirmation Criteria Check
 
 Path B provides a secondary, fully spiking output layer consisting of a single downstream **Threat LIF Neuron** driven by the 8 hidden reservoir neurons:
 
-- **Feed-Forward Inhibition (FFI):** When benign context (DNS, NTP, DHCP, Enterprise RPC) is detected, an Inhibitory Post-Synaptic Potential ($\text{IPSP} = 500.0$) is injected directly into the Threat LIF neuron, hyperpolarizing its membrane and preventing false alarms.
-
+- **Feed-Forward Inhibition (FFI):** When benign context (DNS, NTP, DHCP, Enterprise RPC) is detected, the engine increments the whitelist suppression telemetry and injects an Inhibitory Post-Synaptic Potential ($\text{IPSP} = 500.0$) directly into the Threat LIF neuron, hyperpolarizing its membrane and preventing false alarms.
 - **Eligibility Traces & Reward-Modulated STDP (R-STDP):** Each input synapse tracks an eligibility trace $e_i$ that increments upon hidden neuron firing and decays over time:
 
 $$e_i \leftarrow \min(e_i + 1.0, \ 10.0)$$

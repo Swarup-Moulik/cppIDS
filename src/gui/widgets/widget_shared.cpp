@@ -6,6 +6,8 @@
 #include <sstream>
 #include <string>
 
+extern bool g_disable_whitelist;
+
 namespace widget_shared {
 
 /* @brief Generates the terminal CLI equivalent of the current GUI state */
@@ -19,6 +21,11 @@ std::string GenerateCommandPreview(bool is_live) {
   if (strlen(g_state.config_path) > 0 &&
       strcmp(g_state.config_path, "config/ids_config.ini") != 0)
     cmd << " --config \"" << g_state.config_path << "\"";
+
+  // Append the ablation flag to the command preview if checked
+  if (g_disable_whitelist) {
+    cmd << " --no-whitelist";
+  }
 
   // Construct the full target model path for saving/loading
   std::string full_target_path = g_state.train_model_dir;
@@ -246,6 +253,15 @@ void RenderConfigSettings() {
     ImGui::SetNextItemWidth(-1);
     ImGui::InputTextWithHint("##Ports", "optional", g_state.target_ports,
                              sizeof(g_state.target_ports));
+
+    ImGui::Spacing();
+    ImGui::Checkbox("Disable service-port damping (--no-whitelist)",
+                    &::g_disable_whitelist);
+    if (ImGui::IsItemHovered()) {
+      ImGui::SetMouseCursor(ImGuiMouseCursor_Hand);
+      ImGui::SetTooltip("Bypass the contextual prior. Improves raw detection "
+                        "but increases False Positives.");
+    }
   }
 }
 
@@ -287,6 +303,15 @@ void RenderPinnedControls(bool is_live) {
                       g_state.read_mode == ReadoutMode::TRAIN_LR);
 
     if (is_saving && strlen(g_state.train_model_dir) == 0) {
+      can_start = false;
+    }
+
+    // Prevent execution if base model is required but missing
+    bool needs_base_model = (g_state.res_mode == ReservoirMode::TRANSFER ||
+                             g_state.res_mode == ReservoirMode::TEST_FROZEN ||
+                             g_state.read_mode != ReadoutMode::NONE);
+
+    if (needs_base_model && strlen(g_state.base_model_path) == 0) {
       can_start = false;
     }
 

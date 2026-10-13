@@ -200,7 +200,11 @@ void print_full_metric_report(uint64_t total_time_ms) {
             << "Context Matches:           " << g_context_stats.context_matches
             << "\n"
             << "Context Mismatches:        "
-            << g_context_stats.context_mismatches << "\n";
+            << g_context_stats.context_mismatches << "\n"
+            << "Whitelist Swallowed Total: "
+            << g_context_stats.whitelist_swallowed_total << "\n"
+            << "Whitelist Swallowed (Mal): "
+            << g_context_stats.whitelist_swallowed_malicious << "\n";
 
   double context_fp_reduction = 0.0;
   if (g_context_stats.anomalies_detected > 0) {

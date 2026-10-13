@@ -142,9 +142,10 @@ void RenderReport() {
                        "SNN Neuromorphic Dynamics");
     ImGui::Separator();
 
-    uint64_t t_spikes = 0, t_synops = 0, t_weights = 0;
-    uint32_t t_neurons = 0;
-    snn_get_telemetry_flat(&t_spikes, &t_synops, &t_weights, &t_neurons);
+    uint64_t t_spikes = g_state.final_spikes.load();
+    uint64_t t_synops = g_state.final_synops.load();
+    uint64_t t_weights = g_state.final_weights.load();
+    uint32_t t_neurons = g_state.final_neurons.load();
 
     if (ImGui::BeginTable("SNNStats", 2, ImGuiTableFlags_RowBg)) {
       ImGui::TableNextRow();
@@ -231,6 +232,17 @@ void RenderReport() {
       ImGui::Text("Episodes Resolved:");
       ImGui::TableSetColumnIndex(1);
       ImGui::Text("%llu", g_context_stats.episodes_resolved);
+      ImGui::TableNextRow();
+      ImGui::TableSetColumnIndex(0);
+      ImGui::Text("Whitelist Swallowed (Tot):");
+      ImGui::TableSetColumnIndex(1);
+      ImGui::Text("%llu", g_context_stats.whitelist_swallowed_total);
+      ImGui::TableNextRow();
+      ImGui::TableSetColumnIndex(0);
+      ImGui::Text("Whitelist Swallowed (Mal):");
+      ImGui::TableSetColumnIndex(1);
+      ImGui::TextColored(ImVec4(0.9f, 0.4f, 0.1f, 1.0f), "%llu",
+                         g_context_stats.whitelist_swallowed_malicious);
       ImGui::EndTable();
     }
 

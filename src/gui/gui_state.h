@@ -50,6 +50,10 @@ struct GuiState {
   std::atomic<int> active_flows{0};
   std::atomic<float> current_anomaly_score{0.0f};
   std::atomic<float> processing_latency_ms{0.0f};
+  std::atomic<uint64_t> final_spikes{0};
+  std::atomic<uint64_t> final_synops{0};
+  std::atomic<uint64_t> final_weights{0};
+  std::atomic<uint32_t> final_neurons{0};
 
   // --- Real-time Plotting & Alerts ---
   std::mutex dashboard_mutex;

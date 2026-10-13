@@ -60,11 +60,11 @@ flowchart TD
         F1["on_anomaly_detected()<br/>scorer.cpp"] --> F2["Normalize Anomaly Score"]
         F2 --> F3{"Which Readout Phase?"}
         F3 -- "Phase 1: Deterministic" --> F4["Heuristic Rules"]
-        F4 -- "Benign Context" --> F5["Apply Homeostasis<br/>Suppress Alert"]
+        F4 -- "Benign Context" --> F5["Log Suppression<br/>Apply Homeostasis<br/>Suppress Alert"]
         F4 -- "Persistent Spikes/Volumetric" --> F6["Threat Confirmed"]
         F3 -- "Phase 2A: Spiking Readout" --> F7["snn_readout_integrate_spike<br/>snn_readout.cpp"]
         F7 --> F8["Benign Context<br/>e.g., DNS/SSH?"]
-        F8 -- Yes --> F9["Feed-Forward Inhibition<br/>Suppress Alert"]
+        F8 -- Yes --> F9["Log Suppression<br/>Feed-Forward Inhibition<br/>Suppress Alert"]
         F8 -- No --> F10{"Threat LIF Neuron<br/>Fired?"}
         F10 -- Yes --> F6
         F3 -- "Phase 2B: Logistic Regression" --> F11["Extract READOUT_DIM Features<br/>readout_features.h"]

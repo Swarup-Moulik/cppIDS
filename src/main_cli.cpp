@@ -157,6 +157,10 @@ void print_telemetry() {
       << "\n"
       << "Episodes Resolved:         " << g_context_stats.episodes_resolved
       << "\n"
+      << "Whitelist Swallowed Total: "
+      << g_context_stats.whitelist_swallowed_total << "\n"
+      << "Whitelist Swallowed (Mal): "
+      << g_context_stats.whitelist_swallowed_malicious << "\n"
       << "\n[GROUND TRUTH EVALUATION]\n"
       << "True Positives:            " << g_context_stats.true_positives << "\n"
       << "False Positives:           " << g_context_stats.false_positives
@@ -292,6 +296,9 @@ int main(int argc, char **argv) {
   app.add_option("--ports", ports_csv, "CSV list of target ports");
   app.add_option("--base-model", base_model_path,
                  "Path to pre-trained base model");
+  extern bool g_disable_whitelist;
+  app.add_flag("--no-whitelist", g_disable_whitelist,
+               "Disable service-port damping");
 
   auto mode_group =
       app.add_option_group("Execution Modes", "Select exactly one mode")

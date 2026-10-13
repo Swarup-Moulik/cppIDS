@@ -135,8 +135,8 @@ Both `cppids` and `eval_harness` share unified CLI parameter semantics:
 | `--train-lr`          | `<model.bin>`    | Buffers flow features into memory and fits an L2-regularized logistic model on exit.                          |
 | `--test-lr`           | `<model.bin>`    | Scores flows using a pre-trained logistic regression readout head.                                            |
 | `--export-features`   | `<file.csv>`     | Exports 11-dimensional neuromorphic flow features and ground truth labels to CSV for deep learning baselines. |
+| `--no-whitelist`      | *None*           | Disables the service-port contextual prior to evaluate raw anomaly detection (ablation study).                |
 | `[positional]`        | `<file.pcap>`    | Path(s) to PCAP files for offline replay benchmarking.                                                        |
-
 ---
 
 ## 5. Usage & Execution Workflows
@@ -225,7 +225,15 @@ Refer to the reports folder for detailed performance metrics and benchmark resul
 - **Display:** 15.6-inch Full HD (1920 x 1080) Anti-Glare LED-backlit
 - **Operating System (Factory):** Windows 10
 
-## 8. Acknowledgements & Research Inspirations
+## 8. Limitations & Service-Port Prior Trade-Offs
+
+To maintain strict False Positive Rates ($\text{FPR} < 2.5\%$) in production enterprise environments, the hybrid inference engine implements a conservative service-layer prior that damps anomalous firing on standardized infrastructure ports (e.g., HTTP/S, DNS, SMB, SSH) unless volumetric flood conditions are established ($\ge 60$ concurrent endpoint pairs). While this inductive bias successfully prevents normal high-frequency web traffic from saturating alerting pipelines, it introduces an architectural trade-off: non-volumetric, application-layer attacks operating over standard web services (such as targeted SQL injection or web application fuzzing) are suppressed alongside benign background sessions. Furthermore, symmetrical port matching is susceptible to adversarial source-port masquerading.
+
+To quantify this blind spot empirically rather than masking it, the engine explicitly logs `Whitelist Swallowed Total` and `Whitelist Swallowed (Malicious)` metrics during evaluation. The prior can also be disabled entirely via the `--no-whitelist` ablation flag to measure raw detection coverage. Future iterations will transition this binary damping mechanism into a continuous Bayesian prior, incorporate stateful TCP handshake tracking to restrict matching exclusively to destination server sockets, and introduce per-service micro-reservoirs specialized in intra-payload structural variance rather than raw volumetric density.
+
+---
+
+## 9. Acknowledgements & Research Inspirations
 
 The foundational knowledge and inspiration for utilizing Spiking Neural Networks (SNNs) in this project were initially discovered through discussions and resources shared within the **Open Neuromorphic Discord server**.
 

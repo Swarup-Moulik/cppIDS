@@ -280,6 +280,15 @@ void DaemonWorker() {
       }
       g_state.current_anomaly_score.store(score);
 
+      uint64_t cur_spikes = 0, cur_synops = 0, cur_weights = 0;
+      uint32_t cur_neurons = 0;
+      snn_get_telemetry_flat(&cur_spikes, &cur_synops, &cur_weights,
+                             &cur_neurons);
+      g_state.final_spikes.store(cur_spikes);
+      g_state.final_synops.store(cur_synops);
+      g_state.final_weights.store(cur_weights);
+      g_state.final_neurons.store(cur_neurons);
+
       for (const auto &[hash, flow] : active_flows) {
         if (flow.threat_confirmed == 1 &&
             alerted_flows.find(hash) == alerted_flows.end()) {
@@ -363,6 +372,14 @@ void DaemonWorker() {
                 << full_target_path << "\n";
     }
   }
+
+  uint64_t end_spikes = 0, end_synops = 0, end_weights = 0;
+  uint32_t end_neurons = 0;
+  snn_get_telemetry_flat(&end_spikes, &end_synops, &end_weights, &end_neurons);
+  g_state.final_spikes.store(end_spikes);
+  g_state.final_synops.store(end_synops);
+  g_state.final_weights.store(end_weights);
+  g_state.final_neurons.store(end_neurons);
 
   snn_reset_state();
   g_state.is_engine_running = false;

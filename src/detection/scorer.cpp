@@ -13,6 +13,7 @@ static float g_fire_threshold = 5000.0f;
 static uint64_t g_cooldown_ms = 10000;
 static float g_homeostatic_step = 1500.0f;
 static float g_homeostatic_max_penalty = 25000.0f;
+bool g_disable_whitelist = false;
 
 /* @brief Sets scoring thresholds, SNN firing limits, and alert suppression
  * cooldowns */
@@ -73,6 +74,15 @@ static inline bool match_enterprise(uint16_t p1, uint16_t p2) {
  * security threats */
 void on_anomaly_detected(uint64_t flow_hash, uint32_t channel_id,
                          uint32_t raw_potential, uint64_t current_time_us) {
+
+  auto is_flow_ground_truth_malicious = [](const FlowRecord &f) -> bool {
+    bool has_atk = is_known_attacker(f.src_ip) || is_known_attacker(f.dest_ip);
+    bool has_vic = are_victims_empty() || is_known_victim(f.src_ip) ||
+                   is_known_victim(f.dest_ip);
+    bool has_prt = are_ports_empty() || is_target_port(f.src_port) ||
+                   is_target_port(f.dest_port);
+    return has_atk && has_vic && has_prt;
+  };
 
   // Scale potential overflow into a normalized magnitude score
   float overflow = static_cast<float>(raw_potential) - g_fire_threshold;
@@ -187,12 +197,22 @@ void on_anomaly_detected(uint64_t flow_hash, uint32_t channel_id,
       // =========================================================
       if (snn_readout_is_enabled()) {
         // Apply feed-forward inhibition on known benign context
-        if (is_dns || is_ntp || is_dhcp || is_enterprise || is_ssh || is_game) {
+        if (!g_disable_whitelist && (is_dns || is_ntp || is_dhcp ||
+                                     is_enterprise || is_ssh || is_game)) {
+          g_context_stats.whitelist_swallowed_total++;
+          if (is_flow_ground_truth_malicious(flow)) {
+            g_context_stats.whitelist_swallowed_malicious++;
+          }
           snn_readout_inject_inhibition(flow_hash, 500.0f, current_time_us);
           return;
         }
 
-        if ((is_web || is_email_ftp) && !is_dos_flood) {
+        if (!g_disable_whitelist &&
+            ((is_web || is_email_ftp) && !is_dos_flood)) {
+          g_context_stats.whitelist_swallowed_total++;
+          if (is_flow_ground_truth_malicious(flow)) {
+            g_context_stats.whitelist_swallowed_malicious++;
+          }
           snn_readout_inject_inhibition(flow_hash, 500.0f, current_time_us);
           return;
         }
@@ -262,8 +282,13 @@ void on_anomaly_detected(uint64_t flow_hash, uint32_t channel_id,
       }
 
       // Suppress benign matches across common infrastructure services
-      if (is_web || is_email_ftp || is_dns || is_ntp || is_dhcp ||
-          is_enterprise || is_ssh || is_game) {
+      if (!g_disable_whitelist &&
+          (is_web || is_email_ftp || is_dns || is_ntp || is_dhcp ||
+           is_enterprise || is_ssh || is_game)) {
+        g_context_stats.whitelist_swallowed_total++;
+        if (is_flow_ground_truth_malicious(flow)) {
+          g_context_stats.whitelist_swallowed_malicious++;
+        }
         flow.episode_peak_magnitude = 0;
         snn_apply_homeostasis(flow_hash, g_homeostatic_step,
                               g_homeostatic_max_penalty);
