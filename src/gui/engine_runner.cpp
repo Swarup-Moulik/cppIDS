@@ -65,7 +65,7 @@ void DaemonWorker() {
     load_config_file(g_state.config_path, cfg);
   }
 
-  // --- CRITICAL FIX: Fully purge stale backend states from previous runs ---
+  // Fully purge stale backend states from previous runs
   snn_reset_state();
   active_flows.clear();
 
@@ -80,9 +80,15 @@ void DaemonWorker() {
   parse_and_register_victims(g_state.victims_list);
   parse_and_register_ports(g_state.target_ports);
 
+  std::string full_target_path = g_state.train_model_dir;
+  if (!full_target_path.empty() && full_target_path.back() != '/' &&
+      full_target_path.back() != '\\') {
+    full_target_path += "/";
+  }
+  full_target_path += g_state.train_model_name;
+
   // 3. Configure Neuromorphic Reservoir Modes
-  if (strlen(g_state.base_model_path) > 0 &&
-      g_state.res_mode != ReservoirMode::STDP_ONLINE) {
+  if (strlen(g_state.base_model_path) > 0) {
     snn_load_model(g_state.base_model_path);
   }
 
@@ -102,18 +108,28 @@ void DaemonWorker() {
   if (g_state.read_mode == ReadoutMode::TRAIN_SNN) {
     snn_set_mode(false, true);
     snn_readout_set_mode(true, true);
+    lr_readout_set_mode(false, false); // Force LR off
   } else if (g_state.read_mode == ReadoutMode::TEST_SNN) {
     snn_set_mode(false, true);
+    snn_readout_load_model(full_target_path);
     snn_readout_set_mode(true, false);
+    lr_readout_set_mode(false, false); // Force LR off
   } else if (g_state.read_mode == ReadoutMode::TRAIN_LR) {
     snn_set_mode(false, true);
     lr_readout_set_mode(true, true);
+    snn_readout_set_mode(false, false); // Force SNN readout off
   } else if (g_state.read_mode == ReadoutMode::TEST_LR) {
     snn_set_mode(false, true);
+    lr_get_model().load(full_target_path);
     lr_readout_set_mode(true, false);
+    snn_readout_set_mode(false, false); // Force SNN readout off
+  } else {
+    // If Readout is "None"
+    snn_readout_set_mode(false, false);
+    lr_readout_set_mode(false, false);
   }
 
-  snn_seed_rng(static_cast<uint32_t>(get_time_us()));
+  snn_seed_rng(13371337u);
   snn_configure(cfg.tau, cfg.fire_threshold, cfg.debug_mode);
   init_scorer();
   set_scorer_config(cfg.alert_threshold, cfg.fire_threshold,
@@ -190,7 +206,7 @@ void DaemonWorker() {
       g_runtime_stats.packets_processed++;
 
       // Neural garbage collection
-      if (g_runtime_stats.packets_processed % 5000 == 0) {
+      if (g_runtime_stats.packets_processed % 5000 == 0 && !is_offline) {
         snn_sweep_stale(60.0f, pkt_time_us);
       }
     } else if (res == -1 || res == -2) {
@@ -322,6 +338,33 @@ void DaemonWorker() {
     commit_flow_ground_truth(flow);
   }
 
+  // Serialize models based on GUI state
+  if (g_state.read_mode == ReadoutMode::TRAIN_LR) {
+    std::cout << "\n[TRAINING] Fitting Logistic Regression over collected flow "
+                 "buffer...\n";
+    lr_get_model().fit(lr_get_training_buffer(), /*epochs=*/100, /*lr=*/0.2f,
+                       /*l2=*/0.001f);
+    if (lr_get_model().save(full_target_path)) {
+      std::cout << "[SYSTEM] Logistic Regression Model saved to "
+                << full_target_path << "\n";
+    }
+  }
+
+  if (g_state.res_mode == ReservoirMode::TRAIN) {
+    if (snn_export_model(full_target_path)) {
+      std::cout << "[SYSTEM] Successfully exported Threat Baseline to "
+                << full_target_path << "\n";
+    }
+  }
+
+  if (g_state.read_mode == ReadoutMode::TRAIN_SNN) {
+    if (snn_readout_export_model(full_target_path)) {
+      std::cout << "[SYSTEM] Successfully exported Spiking Readout to "
+                << full_target_path << "\n";
+    }
+  }
+
+  snn_reset_state();
   g_state.is_engine_running = false;
 }
 

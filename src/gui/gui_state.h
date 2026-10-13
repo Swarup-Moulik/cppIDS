@@ -27,7 +27,7 @@ struct GuiState {
   std::vector<std::string> pcap_files;
 
   // Shared Configuration
-  char config_path[256] = "config/ids_config.ini";
+  char config_path[256] = "";
   int eval_interval_sec = 60;
   int telemetry_interval_min = 5;
 
@@ -36,6 +36,8 @@ struct GuiState {
 
   char base_model_path[256] = "";
   char export_features_path[256] = "";
+  char train_model_dir[512] = "";
+  char train_model_name[256] = "model.bin";
 
   // Ground Truth (Presets will populate these)
   char attackers_list[512] = "";

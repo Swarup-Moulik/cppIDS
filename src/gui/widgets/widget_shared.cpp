@@ -2,7 +2,9 @@
 #include "../engine_runner.h"
 #include "../gui_state.h"
 #include "imgui.h"
+#include "portable-file-dialogs.h"
 #include <sstream>
+#include <string>
 
 namespace widget_shared {
 
@@ -17,23 +19,41 @@ std::string GenerateCommandPreview(bool is_live) {
   if (strlen(g_state.config_path) > 0 &&
       strcmp(g_state.config_path, "config/ids_config.ini") != 0)
     cmd << " --config \"" << g_state.config_path << "\"";
-  if (g_state.res_mode == ReservoirMode::TRAIN)
-    cmd << " --train \"" << g_state.base_model_path << "\"";
-  else if (g_state.res_mode == ReservoirMode::TRANSFER)
-    cmd << " --transfer \"" << g_state.base_model_path << "\"";
-  else if (g_state.res_mode == ReservoirMode::TEST_FROZEN)
-    cmd << " --test \"" << g_state.base_model_path << "\"";
-  else
-    cmd << " --stdp";
 
-  if (g_state.read_mode == ReadoutMode::TRAIN_SNN)
-    cmd << " --train-snn-readout";
-  else if (g_state.read_mode == ReadoutMode::TEST_SNN)
-    cmd << " --test-snn-readout";
-  else if (g_state.read_mode == ReadoutMode::TRAIN_LR)
-    cmd << " --train-lr";
-  else if (g_state.read_mode == ReadoutMode::TEST_LR)
-    cmd << " --test-lr";
+  // Construct the full target model path for saving/loading
+  std::string full_target_path = g_state.train_model_dir;
+  if (!full_target_path.empty() && full_target_path.back() != '/' &&
+      full_target_path.back() != '\\') {
+    full_target_path += "/";
+  }
+  full_target_path += g_state.train_model_name;
+
+  bool is_readout = (g_state.read_mode != ReadoutMode::NONE);
+
+  if (is_readout) {
+    // Readout modes strictly require a base model for the reservoir
+    if (strlen(g_state.base_model_path) > 0)
+      cmd << " --base-model \"" << g_state.base_model_path << "\"";
+
+    if (g_state.read_mode == ReadoutMode::TRAIN_SNN)
+      cmd << " --train-snn-readout \"" << full_target_path << "\"";
+    else if (g_state.read_mode == ReadoutMode::TEST_SNN)
+      cmd << " --test-snn-readout \"" << full_target_path << "\"";
+    else if (g_state.read_mode == ReadoutMode::TRAIN_LR)
+      cmd << " --train-lr \"" << full_target_path << "\"";
+    else if (g_state.read_mode == ReadoutMode::TEST_LR)
+      cmd << " --test-lr \"" << full_target_path << "\"";
+  } else {
+    // Reservoir-only execution modes
+    if (g_state.res_mode == ReservoirMode::TRAIN)
+      cmd << " --train \"" << full_target_path << "\"";
+    else if (g_state.res_mode == ReservoirMode::TRANSFER)
+      cmd << " --transfer \"" << g_state.base_model_path << "\"";
+    else if (g_state.res_mode == ReservoirMode::TEST_FROZEN)
+      cmd << " --test \"" << g_state.base_model_path << "\"";
+    else
+      cmd << " --stdp";
+  }
 
   if (strlen(g_state.attackers_list) > 0)
     cmd << " --attackers " << g_state.attackers_list;
@@ -61,9 +81,22 @@ void RenderConfigSettings() {
 
   // Config File
   ImGui::TextDisabled("Config file");
+  if (ImGui::Button("Browse Config", ImVec2(-1, 0))) {
+    auto sel =
+        pfd::open_file("Select Configuration INI", "",
+                       {"INI Files", "*.ini", "All", "*"}, pfd::opt::none)
+            .result();
+    if (!sel.empty()) {
+      snprintf(g_state.config_path, sizeof(g_state.config_path), "%s",
+               sel[0].c_str());
+    }
+  }
+  if (ImGui::IsItemHovered())
+    ImGui::SetMouseCursor(ImGuiMouseCursor_Hand);
+
   ImGui::SetNextItemWidth(-1);
-  ImGui::InputText("##Config File", g_state.config_path,
-                   sizeof(g_state.config_path));
+  ImGui::InputTextWithHint("##ConfigFile", "Select an ids_config.ini...",
+                           g_state.config_path, sizeof(g_state.config_path));
   ImGui::Spacing();
 
   // Reservoir Mode
@@ -82,15 +115,6 @@ void RenderConfigSettings() {
   if (ImGui::IsItemHovered())
     ImGui::SetMouseCursor(ImGuiMouseCursor_Hand);
   g_state.res_mode = static_cast<ReservoirMode>(res_mode);
-
-  if (g_state.res_mode != ReservoirMode::STDP_ONLINE) {
-    ImGui::Spacing();
-    ImGui::TextDisabled("Base model");
-    ImGui::SetNextItemWidth(-1);
-    ImGui::InputTextWithHint("##BaseModel", "Model path...",
-                             g_state.base_model_path,
-                             sizeof(g_state.base_model_path));
-  }
   ImGui::Spacing();
 
   // Readout Mode
@@ -112,6 +136,92 @@ void RenderConfigSettings() {
   if (ImGui::IsItemHovered())
     ImGui::SetMouseCursor(ImGuiMouseCursor_Hand);
   g_state.read_mode = static_cast<ReadoutMode>(read_mode);
+  ImGui::Spacing();
+
+  // Determine required file pickers based on the active CLI mode combinations
+  bool needs_base_model = (g_state.res_mode == ReservoirMode::TRANSFER ||
+                           g_state.res_mode == ReservoirMode::TEST_FROZEN ||
+                           g_state.read_mode != ReadoutMode::NONE);
+
+  bool is_saving = (g_state.res_mode == ReservoirMode::TRAIN ||
+                    g_state.read_mode == ReadoutMode::TRAIN_SNN ||
+                    g_state.read_mode == ReadoutMode::TRAIN_LR);
+
+  bool needs_target_model = (g_state.res_mode == ReservoirMode::TRAIN ||
+                             g_state.read_mode != ReadoutMode::NONE);
+
+  ImGui::SeparatorText("Model Weights");
+
+  if (needs_base_model) {
+    ImGui::TextDisabled("Base Model (Reservoir)");
+    if (ImGui::Button("Browse Base Model", ImVec2(-1, 0))) {
+      auto sel =
+          pfd::open_file("Select Base Model", "",
+                         {"Model Files", "*.bin", "All", "*"}, pfd::opt::none)
+              .result();
+      if (!sel.empty()) {
+        snprintf(g_state.base_model_path, sizeof(g_state.base_model_path), "%s",
+                 sel[0].c_str());
+      }
+    }
+    if (ImGui::IsItemHovered())
+      ImGui::SetMouseCursor(ImGuiMouseCursor_Hand);
+
+    ImGui::SetNextItemWidth(-1);
+    ImGui::InputTextWithHint("##BaseModel", "Path to existing baseline...",
+                             g_state.base_model_path,
+                             sizeof(g_state.base_model_path));
+    ImGui::Spacing();
+  }
+
+  if (needs_target_model) {
+    ImGui::TextDisabled(is_saving ? "Save Target" : "Readout Model");
+    if (ImGui::Button(is_saving ? "Select Save Location"
+                                : "Select Readout File",
+                      ImVec2(-1, 0))) {
+      if (is_saving) {
+        auto sel =
+            pfd::save_file("Select Save Location & Model Name", "",
+                           {"Model Files", "*.bin", "All", "*"}, pfd::opt::none)
+                .result();
+        if (!sel.empty()) {
+          size_t pos = sel.find_last_of("/\\");
+          if (pos != std::string::npos) {
+            snprintf(g_state.train_model_dir, sizeof(g_state.train_model_dir),
+                     "%s", sel.substr(0, pos).c_str());
+            snprintf(g_state.train_model_name, sizeof(g_state.train_model_name),
+                     "%s", sel.substr(pos + 1).c_str());
+          }
+        }
+      } else {
+        auto sel =
+            pfd::open_file("Select Readout Model", "",
+                           {"Model Files", "*.bin", "All", "*"}, pfd::opt::none)
+                .result();
+        if (!sel.empty()) {
+          size_t pos = sel[0].find_last_of("/\\");
+          if (pos != std::string::npos) {
+            snprintf(g_state.train_model_dir, sizeof(g_state.train_model_dir),
+                     "%s", sel[0].substr(0, pos).c_str());
+            snprintf(g_state.train_model_name, sizeof(g_state.train_model_name),
+                     "%s", sel[0].substr(pos + 1).c_str());
+          }
+        }
+      }
+    }
+    if (ImGui::IsItemHovered())
+      ImGui::SetMouseCursor(ImGuiMouseCursor_Hand);
+
+    ImGui::SetNextItemWidth(-1);
+    ImGui::InputTextWithHint("##TargetDir", "Directory path...",
+                             g_state.train_model_dir,
+                             sizeof(g_state.train_model_dir));
+
+    ImGui::SetNextItemWidth(-1);
+    ImGui::InputTextWithHint("##TargetName", "e.g. target_model.bin",
+                             g_state.train_model_name,
+                             sizeof(g_state.train_model_name));
+  }
   ImGui::Spacing();
 
   // Ground Truth
@@ -170,6 +280,16 @@ void RenderPinnedControls(bool is_live) {
 
     bool can_start = is_live ? (strlen(g_state.interface_name) > 0)
                              : !g_state.pcap_files.empty();
+
+    // Prevent execution if a required save directory path is missing
+    bool is_saving = (g_state.res_mode == ReservoirMode::TRAIN ||
+                      g_state.read_mode == ReadoutMode::TRAIN_SNN ||
+                      g_state.read_mode == ReadoutMode::TRAIN_LR);
+
+    if (is_saving && strlen(g_state.train_model_dir) == 0) {
+      can_start = false;
+    }
+
     if (!can_start)
       ImGui::BeginDisabled();
 
